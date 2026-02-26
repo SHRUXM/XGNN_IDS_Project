@@ -1,0 +1,23 @@
+# Virtual Environment
+venv/
+xgnn_env/
+env/
+.env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# PyCharm
+.idea/
+
+# Outputs (optional - comment out if you want to push plots)
+# outputs/*.pt
+# outputs/*.png
+
+# OS files
+.DS_Store
+Thumbs.db
