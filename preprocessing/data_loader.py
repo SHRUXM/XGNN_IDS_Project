@@ -10,16 +10,23 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 import os
 
-def load_dataset(filepath):
+def load_dataset(train_path, test_path=None):
     """
-    Load the CICIDS2017 or UNSW-NB15 dataset from CSV file
+    Load the KDD Cup Network Intrusion dataset
     """
-    print(f"Loading dataset from: {filepath}")
-    df = pd.read_csv(filepath)
-    print(f"Dataset loaded successfully!")
-    print(f"Shape: {df.shape}")
-    print(f"Columns: {list(df.columns)}")
-    return df
+    print(f"Loading training dataset from: {train_path}")
+    train_df = pd.read_csv(train_path)
+    print(f"Training dataset loaded successfully!")
+    print(f"Train Shape: {train_df.shape}")
+
+    if test_path:
+        print(f"\nLoading test dataset from: {test_path}")
+        test_df = pd.read_csv(test_path)
+        print(f"Test dataset loaded successfully!")
+        print(f"Test Shape: {test_df.shape}")
+        return train_df, test_df
+
+    return train_df, None
 
 
 def clean_dataset(df):
@@ -41,7 +48,7 @@ def clean_dataset(df):
     after = len(df)
     print(f"Removed {before - after} rows with missing values")
 
-    # Replace infinite values with NaN then drop
+    # Replace infinite values
     df = df.replace([np.inf, -np.inf], np.nan)
     df = df.dropna()
     print(f"Removed infinite values")
@@ -50,90 +57,103 @@ def clean_dataset(df):
     return df
 
 
-def encode_labels(df, label_column):
+def encode_labels(df):
     """
-    Encode attack labels into binary format
-    0 = Benign (normal traffic)
-    1 = Attack (malicious traffic)
+    Encode labels into binary format
+    normal = 0
+    anomaly = 1
     """
     print("\nEncoding labels...")
 
-    # Strip whitespace from label column
-    df[label_column] = df[label_column].str.strip()
-
     # Show unique labels
-    print(f"Unique labels found: {df[label_column].unique()}")
+    print(f"Unique labels: {df['class'].unique()}")
 
-    # Binary encoding - BENIGN = 0, everything else = 1
-    df['label'] = df[label_column].apply(
-        lambda x: 0 if x == 'BENIGN' else 1
+    # Binary encoding
+    df['label'] = df['class'].apply(
+        lambda x: 0 if x == 'normal' else 1
     )
 
-    print(f"Benign samples: {(df['label'] == 0).sum()}")
-    print(f"Attack samples: {(df['label'] == 1).sum()}")
+    print(f"Normal samples: {(df['label'] == 0).sum()}")
+    print(f"Anomaly samples: {(df['label'] == 1).sum()}")
 
     return df
 
 
-def normalize_features(df, label_column):
+def encode_categorical(df):
+    """
+    Encode categorical columns into numerical values
+    This dataset has 3 categorical columns:
+    protocol_type, service, flag
+    """
+    print("\nEncoding categorical features...")
+
+    categorical_cols = ['protocol_type', 'service', 'flag']
+    le = LabelEncoder()
+
+    for col in categorical_cols:
+        if col in df.columns:
+            df[col] = le.fit_transform(df[col].astype(str))
+            print(f"Encoded column: {col}")
+
+    return df
+
+
+def normalize_features(df):
     """
     Normalize numerical features using MinMaxScaler
     """
     print("\nNormalizing features...")
 
-    # Select only numerical columns
-    # excluding label columns
-    exclude_cols = [label_column, 'label',
-                   'Source IP', 'Destination IP',
-                   'source_ip', 'destination_ip',
-                   'src_ip', 'dst_ip']
+    # Columns to exclude from normalization
+    exclude_cols = ['class', 'label']
 
-    # Get numerical columns only
+    # Get numerical columns
     num_cols = df.select_dtypes(
         include=[np.number]
     ).columns.tolist()
 
-    # Remove label column from numerical columns
+    # Remove excluded columns
     num_cols = [c for c in num_cols
                 if c not in exclude_cols]
 
-    # Apply MinMax scaling
+    # Apply scaling
     scaler = MinMaxScaler()
     df[num_cols] = scaler.fit_transform(df[num_cols])
 
-    print(f"Normalized {len(num_cols)} numerical features")
+    print(f"Normalized {len(num_cols)} features")
     return df, scaler, num_cols
 
 
-def preprocess_pipeline(filepath, label_column='Label'):
+def preprocess_pipeline(train_path, test_path=None):
     """
     Complete preprocessing pipeline
-    Run all steps in order
     """
     print("=" * 50)
     print("Starting Preprocessing Pipeline")
     print("=" * 50)
 
     # Step 1: Load
-    df = load_dataset(filepath)
+    train_df, test_df = load_dataset(train_path, test_path)
 
     # Step 2: Clean
-    df = clean_dataset(df)
+    train_df = clean_dataset(train_df)
 
-    # Step 3: Encode labels
-    df = encode_labels(df, label_column)
+    # Step 3: Encode categorical
+    train_df = encode_categorical(train_df)
 
-    # Step 4: Normalize
-    df, scaler, feature_cols = normalize_features(
-        df, label_column
-    )
+    # Step 4: Encode labels
+    train_df = encode_labels(train_df)
+
+    # Step 5: Normalize
+    train_df, scaler, feature_cols = normalize_features(train_df)
 
     print("\n" + "=" * 50)
     print("Preprocessing Complete!")
-    print(f"Final dataset shape: {df.shape}")
+    print(f"Final training dataset shape: {train_df.shape}")
+    print(f"Features available: {len(feature_cols)}")
     print("=" * 50)
 
-    return df, scaler, feature_cols
+    return train_df, test_df, scaler, feature_cols
 
 
 # ============================================================
@@ -141,13 +161,20 @@ def preprocess_pipeline(filepath, label_column='Label'):
 # ============================================================
 if __name__ == "__main__":
 
-    # Change this path to your actual dataset location
-    dataset_path = "../data/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+    import os
 
-    if os.path.exists(dataset_path):
-        df, scaler, features = preprocess_pipeline(dataset_path)
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    train_path = os.path.join(base_dir, "data", "Train_data.csv")
+    test_path = os.path.join(base_dir, "data", "Test_data.csv")
+
+    if os.path.exists(train_path):
+        train_df, test_df, scaler, features = preprocess_pipeline(
+            train_path, test_path
+        )
         print("\nSample data:")
-        print(df.head())
+        print(train_df.head())
+        print("\nLabel distribution:")
+        print(train_df['label'].value_counts())
     else:
-        print(f"Dataset not found at {dataset_path}")
-        print("Please download CICIDS2017 and place it in data/ folder")
+        print(f"Dataset not found at {train_path}")
+        print("Please place Train_data.csv in data/ folder")
