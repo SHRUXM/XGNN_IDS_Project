@@ -452,6 +452,18 @@ hr {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(0.8); }
 }
+/* ── HIDE SIDEBAR TOGGLE ── */
+button[data-testid="collapsedControl"] {
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+/* ── CUSTOM SIDEBAR ARROW ── */
+section[data-testid="stSidebar"] > div:first-child {
+    padding-top: 1rem !important;
+}
 </style>
 
 <!-- Matrix Rain Canvas -->
@@ -494,14 +506,20 @@ window.addEventListener('resize', () => {
 with st.sidebar:
     st.markdown("""
     <div class="sidebar-logo">
-        <div class="sidebar-logo-text glitch">⬡ XGNN_IDS</div>
+        <div class="sidebar-logo-text glitch">⬡ XGNN IDS</div>
         <div class="sidebar-info">
-            INTRUSION DETECTION<br>
-            NEURAL SYSTEM v1.0<br>
-            ─────────────────<br>
-            AUTHOR: S.S.SHINDE<br>
-            GUIDE: DR.P.KADAM<br>
-            KIRTI COLLEGE · MUM
+            INTRUSION DETECTION SYSTEM<br>
+            NEURAL NETWORK v1.0<br>
+            ─────────────────────────<br>
+            AUTHOR:<br>
+            SHREYAS SANTOSH SHINDE<br>
+            ─────────────────────────<br>
+            GUIDE:<br>
+            DR. PRABHA KADAM<br>
+            ─────────────────────────<br>
+            KIRTI COLLEGE OF ARTS,<br>
+            SCIENCE & COMMERCE<br>
+            MUMBAI · 2026
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -524,7 +542,8 @@ with st.sidebar:
             "◈ MODEL RESULTS",
             "◉ EXPLAINABILITY",
             "▶ LIVE PREDICTION",
-            "◆ MODEL COMPARISON"
+            "◆ MODEL COMPARISON",
+            "📂 CUSTOM DATASET"
         ],
         label_visibility="visible"
     )
@@ -1128,3 +1147,485 @@ elif page == "◆ MODEL COMPARISON":
         KIRTI COLLEGE MUMBAI · 2026
     </div>
     """, unsafe_allow_html=True)
+# ============================================================
+# PAGE 6 — CUSTOM DATASET UPLOAD
+# ============================================================
+
+elif page == "📂 CUSTOM DATASET":
+
+    st.markdown(
+        '<div class="cyber-title" '
+        'style="font-size:1.8rem;text-align:left;'
+        'padding:1rem 0;">📂 CUSTOM DATASET ANALYSIS</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown("""
+    <div style="font-family:'Share Tech Mono',monospace;
+                color:rgba(0,200,255,0.7);font-size:0.82rem;
+                letter-spacing:1px;margin-bottom:1rem;">
+        Upload any network traffic CSV file and get
+        instant intrusion detection predictions —
+        no configuration needed!
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Simple Upload ──
+    cyber_header("▸ UPLOAD YOUR DATASET")
+
+    uploaded_file = st.file_uploader(
+        "Drop your CSV file here",
+        type=["csv"],
+        help="Supports: KDD Cup, NSL-KDD, "
+             "CIC-IDS-2017, UNSW-NB15, "
+             "or any network traffic CSV"
+    )
+
+    if uploaded_file is not None:
+
+        try:
+            df = pd.read_csv(uploaded_file)
+            st.success(
+                f"✅ File uploaded successfully! "
+                f"{df.shape[0]} rows · "
+                f"{df.shape[1]} columns detected"
+            )
+        except Exception as e:
+            st.error(f"❌ Could not read file: {e}")
+            st.stop()
+
+        # ── Preview ──
+        cyber_header("▸ DATASET PREVIEW")
+        st.dataframe(
+            df.head(5),
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.markdown("---")
+
+        if st.button("⚡ ANALYZE DATASET",
+                     use_container_width=True):
+
+            with st.spinner(
+                "🔍 Analyzing... please wait"
+            ):
+                try:
+                    import torch
+                    import matplotlib
+                    matplotlib.use('Agg')
+                    import matplotlib.pyplot as plt
+                    import networkx as nx
+                    from sklearn.preprocessing import (
+                        MinMaxScaler, LabelEncoder
+                    )
+                    from sklearn.ensemble import (
+                        IsolationForest,
+                        RandomForestClassifier
+                    )
+
+                    # ── Auto Preprocessing ──
+                    analysis_df = df.copy()
+
+                    # Auto detect and drop
+                    # label-like columns
+                    label_keywords = [
+                        'class', 'label', 'attack',
+                        'target', 'category',
+                        'type', 'outcome'
+                    ]
+                    label_col_found = None
+                    for col in analysis_df.columns:
+                        if any(
+                            kw in col.lower()
+                            for kw in label_keywords
+                        ):
+                            label_col_found = col
+                            break
+
+                    if label_col_found:
+                        true_labels = analysis_df[
+                            label_col_found
+                        ].copy()
+                        analysis_df.drop(
+                            columns=[label_col_found],
+                            inplace=True
+                        )
+                        st.info(
+                            f"🔍 Auto-detected label "
+                            f"column: `{label_col_found}`"
+                        )
+                    else:
+                        true_labels = None
+
+                    # Auto encode categorical columns
+                    le = LabelEncoder()
+                    for col in analysis_df.select_dtypes(
+                        include=['object']
+                    ).columns:
+                        try:
+                            analysis_df[col] = \
+                                le.fit_transform(
+                                    analysis_df[col]
+                                    .astype(str)
+                                )
+                        except:
+                            analysis_df.drop(
+                                columns=[col],
+                                inplace=True,
+                                errors='ignore'
+                            )
+
+                    # Fill missing/infinite values
+                    analysis_df.fillna(0, inplace=True)
+                    analysis_df.replace(
+                        [np.inf, -np.inf],
+                        0, inplace=True
+                    )
+
+                    feature_cols_up = list(
+                        analysis_df.columns
+                    )
+
+                    # Normalize
+                    scaler = MinMaxScaler()
+                    X = scaler.fit_transform(analysis_df)
+
+                    # ── Isolation Forest ──
+                    iso = IsolationForest(
+                        contamination=0.1,
+                        random_state=42,
+                        n_estimators=100
+                    )
+                    iso.fit(X)
+                    scores = iso.decision_function(X)
+                    predictions = iso.predict(X)
+
+                    pred_labels = np.where(
+                        predictions == -1,
+                        'ATTACK', 'NORMAL'
+                    )
+                    confidence_scores = np.abs(scores)
+                    if confidence_scores.max() > 0:
+                        confidence_scores = (
+                            confidence_scores /
+                            confidence_scores.max()
+                        ) * 100
+
+                    # ── Summary Metrics ──
+                    cyber_header("▸ DETECTION RESULTS")
+
+                    attack_count = (
+                        pred_labels == 'ATTACK'
+                    ).sum()
+                    normal_count = (
+                        pred_labels == 'NORMAL'
+                    ).sum()
+                    total = len(pred_labels)
+
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.markdown(f"""
+                        <div class="metric-card">
+                            <div class="metric-label">
+                                TOTAL CONNECTIONS
+                            </div>
+                            <div class="metric-value"
+                                 style="font-size:1.5rem">
+                                {total:,}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    with col2:
+                        st.markdown(f"""
+                        <div class="metric-card"
+                             style="border-color:
+                             rgba(255,0,85,0.5);">
+                            <div class="metric-label"
+                                 style="color:#ff6b6b">
+                                ATTACKS DETECTED
+                            </div>
+                            <div class="metric-value"
+                                 style="color:#ff0055;
+                                 font-size:1.5rem;
+                                 text-shadow:
+                                 0 0 10px #ff0055">
+                                {attack_count:,}
+                            </div>
+                            <div class="metric-delta"
+                                 style="color:
+                                 rgba(255,0,85,0.6)">
+                                {attack_count/total*100:.1f}%
+                                OF TRAFFIC
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    with col3:
+                        st.markdown(f"""
+                        <div class="metric-card"
+                             style="border-color:
+                             rgba(0,255,136,0.5);">
+                            <div class="metric-label">
+                                NORMAL TRAFFIC
+                            </div>
+                            <div class="metric-value"
+                                 style="font-size:1.5rem">
+                                {normal_count:,}
+                            </div>
+                            <div class="metric-delta">
+                                {normal_count/total*100:.1f}%
+                                OF TRAFFIC
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                    st.markdown(
+                        "<br>", unsafe_allow_html=True
+                    )
+
+                    # ── Results Table ──
+                    cyber_header(
+                        "▸ PER-ROW PREDICTIONS"
+                    )
+
+                    results_df = df.copy()
+                    results_df['🔍 PREDICTION'] = \
+                        pred_labels
+                    results_df['📊 CONFIDENCE'] = \
+                        confidence_scores.round(1)\
+                        .astype(str) + '%'
+
+                    # Move prediction cols to front
+                    front_cols = [
+                        '🔍 PREDICTION',
+                        '📊 CONFIDENCE'
+                    ]
+                    other_cols = [
+                        c for c in results_df.columns
+                        if c not in front_cols
+                    ]
+                    results_df = results_df[
+                        front_cols + other_cols
+                    ]
+
+                    st.dataframe(
+                        results_df.head(100),
+                        use_container_width=True,
+                        hide_index=True
+                    )
+
+                    if len(results_df) > 100:
+                        st.caption(
+                            f"Showing first 100 of "
+                            f"{len(results_df):,} rows. "
+                            f"Download CSV for full results."
+                        )
+
+                    st.markdown("---")
+
+                    # ── Feature Importance ──
+                    cyber_header(
+                        "▸ FEATURE IMPORTANCE"
+                    )
+
+                    rf = RandomForestClassifier(
+                        n_estimators=50,
+                        random_state=42,
+                        n_jobs=-1
+                    )
+                    rf.fit(X, predictions)
+                    importances = rf.feature_importances_
+                    top_n = min(15, len(feature_cols_up))
+                    indices = np.argsort(
+                        importances
+                    )[::-1][:top_n]
+
+                    top_features = [
+                        feature_cols_up[i]
+                        for i in indices
+                    ]
+                    top_importance = importances[indices]
+
+                    fig, ax = plt.subplots(
+                        figsize=(10, 6),
+                        facecolor='#020b14'
+                    )
+                    ax.set_facecolor('#020b14')
+
+                    colors_bar = plt.cm.plasma(
+                        np.linspace(
+                            0.2, 0.9,
+                            len(top_features)
+                        )
+                    )
+                    ax.barh(
+                        range(len(top_features)),
+                        top_importance[::-1],
+                        color=colors_bar[::-1],
+                        edgecolor='none',
+                        height=0.7
+                    )
+                    ax.set_yticks(
+                        range(len(top_features))
+                    )
+                    ax.set_yticklabels(
+                        top_features[::-1],
+                        color='#00ff88', fontsize=9
+                    )
+                    ax.set_xlabel(
+                        'Importance Score',
+                        color='#00ccff'
+                    )
+                    ax.set_title(
+                        f'Top {top_n} Important Features',
+                        color='#00ff88',
+                        fontsize=13,
+                        fontweight='bold'
+                    )
+                    ax.tick_params(colors='#00ccff')
+                    for spine in ax.spines.values():
+                        spine.set_edgecolor('#00ff88')
+                    ax.grid(
+                        True, alpha=0.1,
+                        color='#00ff88', axis='x'
+                    )
+                    plt.tight_layout()
+                    st.pyplot(fig)
+                    plt.close()
+
+                    st.markdown("---")
+
+                    # ── Graph Visualization ──
+                    cyber_header(
+                        "▸ NETWORK GRAPH"
+                    )
+
+                    sample_size = min(150, len(X))
+                    sample_idx = np.random.choice(
+                        len(X), sample_size,
+                        replace=False
+                    )
+
+                    G_up = nx.DiGraph()
+                    for idx in sample_idx:
+                        G_up.add_node(
+                            int(idx),
+                            label=pred_labels[idx]
+                        )
+                    for i in range(
+                        len(sample_idx) - 1
+                    ):
+                        G_up.add_edge(
+                            int(sample_idx[i]),
+                            int(sample_idx[i+1])
+                        )
+
+                    fig2, ax2 = plt.subplots(
+                        figsize=(10, 7),
+                        facecolor='#020b14'
+                    )
+                    ax2.set_facecolor('#020b14')
+
+                    pos = nx.spring_layout(
+                        G_up, seed=42, k=1.5
+                    )
+                    node_colors = [
+                        '#ff0055'
+                        if pred_labels[n] == 'ATTACK'
+                        else '#00ff88'
+                        for n in G_up.nodes()
+                    ]
+                    nx.draw_networkx_nodes(
+                        G_up, pos,
+                        node_color=node_colors,
+                        node_size=80,
+                        alpha=0.9, ax=ax2
+                    )
+                    nx.draw_networkx_edges(
+                        G_up, pos,
+                        edge_color='#00ccff',
+                        width=0.5,
+                        arrows=False, ax=ax2
+                    )
+                    ax2.set_title(
+                        'Network Traffic Graph — '
+                        'Red=Attack · Green=Normal',
+                        color='#00ff88',
+                        fontsize=12,
+                        fontweight='bold'
+                    )
+                    ax2.axis('off')
+                    plt.tight_layout()
+                    st.pyplot(fig2)
+                    plt.close()
+
+                    st.markdown("---")
+
+                    # ── Download ──
+                    cyber_header(
+                        "▸ DOWNLOAD RESULTS"
+                    )
+
+                    csv_out = results_df.to_csv(
+                        index=False
+                    ).encode('utf-8')
+
+                    st.download_button(
+                        label="⬇ DOWNLOAD FULL "
+                              "PREDICTIONS AS CSV",
+                        data=csv_out,
+                        file_name=(
+                            "xgnn_predictions.csv"
+                        ),
+                        mime="text/csv",
+                        use_container_width=True
+                    )
+
+                    st.success(
+                        f"✅ Analysis complete! "
+                        f"Detected {attack_count:,} "
+                        f"attacks out of "
+                        f"{total:,} connections."
+                    )
+
+                except Exception as e:
+                    st.error(
+                        f"❌ Analysis error: {str(e)}"
+                    )
+                    st.info(
+                        "💡 Make sure your CSV contains "
+                        "numerical network traffic features."
+                    )
+
+    else:
+        # ── Empty State ──
+        st.markdown("""
+        <div style="background:rgba(0,255,136,0.03);
+                    border:1px dashed
+                    rgba(0,255,136,0.2);
+                    border-radius:8px;
+                    padding:3rem;text-align:center;
+                    margin:2rem 0;">
+            <div style="font-family:'Orbitron',monospace;
+                        font-size:1.5rem;color:#00ff88;
+                        text-shadow:0 0 15px
+                        rgba(0,255,136,0.4);
+                        margin-bottom:1.5rem;">
+                📂 DROP YOUR CSV HERE
+            </div>
+            <div style="font-family:'Share Tech Mono',
+                        monospace;font-size:0.8rem;
+                        color:rgba(0,200,255,0.6);
+                        line-height:2.2;
+                        letter-spacing:1px;">
+                JUST UPLOAD — NO SETUP NEEDED<br>
+                THE SYSTEM DOES EVERYTHING AUTOMATICALLY<br>
+                ────────────────────────────<br>
+                ► KDD CUP 1999 &nbsp;✅<br>
+                ► NSL-KDD &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅<br>
+                ► CIC-IDS-2017 &nbsp;✅<br>
+                ► UNSW-NB15 &nbsp;&nbsp;&nbsp;✅<br>
+                ► ANY NETWORK CSV ✅
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
