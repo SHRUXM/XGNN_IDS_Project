@@ -1,6 +1,6 @@
 # ============================================================
 # XGNN-Based Intrusion Detection System
-# File: app.py - Streamlit Web Application
+# File: app.py - Cyberpunk Streamlit Web Application
 # Author: Shreyas Santosh Shinde
 # MSc Computer Science - Kirti College, Mumbai
 # ============================================================
@@ -8,9 +8,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import os
-import torch
 import sys
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -27,440 +25,872 @@ st.set_page_config(
 )
 
 # ============================================================
-# Custom CSS
+# Cyberpunk CSS + Animations
 # ============================================================
 
 st.markdown("""
-    <style>
-    .main-title {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #1f77b4;
-        text-align: center;
-        padding: 1rem;
-    }
-    .subtitle {
-        font-size: 1.1rem;
-        color: #666;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    .metric-card {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        padding: 1rem;
-        border-radius: 10px;
-        color: white;
-        text-align: center;
-    }
-    .section-header {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #1f77b4;
-        border-bottom: 2px solid #1f77b4;
-        padding-bottom: 0.5rem;
-        margin: 1.5rem 0 1rem 0;
-    }
-    </style>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap');
+
+/* ── GLOBAL RESET ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── MATRIX BACKGROUND ── */
+.stApp {
+    background-color: #020b14 !important;
+    background-image:
+        radial-gradient(ellipse at 20% 50%,
+            rgba(0,255,136,0.04) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%,
+            rgba(180,0,255,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 60% 80%,
+            rgba(0,200,255,0.04) 0%, transparent 60%);
+    font-family: 'Rajdhani', sans-serif !important;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #020b14; }
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(#00ff88, #b400ff);
+    border-radius: 2px;
+}
+
+/* ── SIDEBAR ── */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg,
+        #030d1a 0%,
+        #050f20 50%,
+        #030d1a 100%) !important;
+    border-right: 1px solid rgba(0,255,136,0.2) !important;
+    box-shadow: 4px 0 30px rgba(0,255,136,0.05) !important;
+}
+
+section[data-testid="stSidebar"] * {
+    font-family: 'Share Tech Mono', monospace !important;
+    color: #00ff88 !important;
+}
+
+section[data-testid="stSidebar"] .stRadio label {
+    color: #00cc6a !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 1px !important;
+    transition: all 0.3s ease !important;
+    padding: 4px 0 !important;
+}
+
+section[data-testid="stSidebar"] .stRadio label:hover {
+    color: #ffffff !important;
+    text-shadow: 0 0 10px #00ff88 !important;
+}
+
+/* ── MAIN HEADER ── */
+.cyber-header {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+    position: relative;
+}
+
+.cyber-title {
+    font-family: 'Orbitron', monospace !important;
+    font-size: clamp(1.8rem, 4vw, 3.2rem) !important;
+    font-weight: 900 !important;
+    background: linear-gradient(
+        135deg,
+        #00ff88 0%,
+        #00ccff 40%,
+        #b400ff 80%,
+        #00ff88 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    animation: shimmer 4s linear infinite,
+               glow-text 2s ease-in-out infinite alternate;
+    letter-spacing: 3px;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+}
+
+@keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+@keyframes glow-text {
+    from { filter: drop-shadow(0 0 8px rgba(0,255,136,0.4)); }
+    to   { filter: drop-shadow(0 0 20px rgba(0,200,255,0.8)); }
+}
+
+.cyber-subtitle {
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: 0.9rem !important;
+    color: rgba(0,255,136,0.6) !important;
+    letter-spacing: 4px !important;
+    text-transform: uppercase !important;
+    margin-top: 0.5rem;
+}
+
+/* ── SCANLINE EFFECT ── */
+.cyber-header::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,255,136,0.015) 2px,
+        rgba(0,255,136,0.015) 4px
+    );
+    pointer-events: none;
+    animation: scanlines 8s linear infinite;
+}
+
+@keyframes scanlines {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100px; }
+}
+
+/* ── METRIC CARDS ── */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.metric-card {
+    background: linear-gradient(135deg,
+        rgba(0,255,136,0.04) 0%,
+        rgba(0,30,60,0.8) 100%);
+    border: 1px solid rgba(0,255,136,0.25);
+    border-radius: 8px;
+    padding: 1.2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    animation: card-appear 0.6s ease forwards;
+}
+
+.metric-card:nth-child(2) { animation-delay: 0.1s; }
+.metric-card:nth-child(3) { animation-delay: 0.2s; }
+.metric-card:nth-child(4) { animation-delay: 0.3s; }
+
+@keyframes card-appear {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg,
+        transparent, #00ff88, transparent);
+    animation: scan-line 3s linear infinite;
+}
+
+.metric-card:nth-child(2)::before { animation-delay: 0.75s; }
+.metric-card:nth-child(3)::before { animation-delay: 1.5s; }
+.metric-card:nth-child(4)::before { animation-delay: 2.25s; }
+
+@keyframes scan-line {
+    0%   { left: -100%; }
+    100% { left: 200%; }
+}
+
+.metric-card:hover {
+    border-color: rgba(0,255,136,0.7);
+    box-shadow: 0 0 25px rgba(0,255,136,0.15),
+                inset 0 0 25px rgba(0,255,136,0.03);
+    transform: translateY(-3px);
+}
+
+.metric-value {
+    font-family: 'Orbitron', monospace !important;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    color: #00ff88 !important;
+    text-shadow: 0 0 15px rgba(0,255,136,0.5);
+    margin: 0.3rem 0;
+}
+
+.metric-label {
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: 0.7rem !important;
+    color: rgba(0,200,255,0.7) !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+}
+
+.metric-delta {
+    font-size: 0.7rem !important;
+    color: rgba(0,255,136,0.5) !important;
+    margin-top: 0.3rem;
+}
+
+/* ── SECTION HEADERS ── */
+.cyber-section {
+    font-family: 'Orbitron', monospace !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: #00ff88 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 3px !important;
+    padding: 0.7rem 1rem !important;
+    border-left: 3px solid #00ff88 !important;
+    background: rgba(0,255,136,0.04) !important;
+    margin: 1.5rem 0 1rem 0 !important;
+    text-shadow: 0 0 10px rgba(0,255,136,0.4);
+}
+
+/* ── PROGRESS BARS ── */
+.progress-container {
+    margin: 0.6rem 0;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: rgba(0,200,255,0.8);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+}
+
+.progress-bar-bg {
+    background: rgba(0,255,136,0.08);
+    border: 1px solid rgba(0,255,136,0.15);
+    border-radius: 2px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    position: relative;
+    animation: fill-bar 1.5s ease forwards;
+    transform-origin: left;
+}
+
+@keyframes fill-bar {
+    from { width: 0% !important; }
+}
+
+.progress-gcn {
+    background: linear-gradient(90deg, #00ff88, #00ccff);
+    box-shadow: 0 0 8px rgba(0,255,136,0.4);
+}
+.progress-gat {
+    background: linear-gradient(90deg, #b400ff, #00ccff);
+    box-shadow: 0 0 8px rgba(180,0,255,0.4);
+}
+.progress-rf {
+    background: linear-gradient(90deg, #ff6b00, #ffcc00);
+    box-shadow: 0 0 8px rgba(255,107,0,0.3);
+}
+.progress-mlp {
+    background: linear-gradient(90deg, #ff0055, #ff6b00);
+    box-shadow: 0 0 8px rgba(255,0,85,0.3);
+}
+
+/* ── DATA TABLE ── */
+.stDataFrame {
+    border: 1px solid rgba(0,255,136,0.2) !important;
+    border-radius: 6px !important;
+}
+
+.stDataFrame th {
+    background: rgba(0,255,136,0.1) !important;
+    color: #00ff88 !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    letter-spacing: 1px !important;
+}
+
+/* ── IMAGES ── */
+.stImage img {
+    border: 1px solid rgba(0,255,136,0.2) !important;
+    border-radius: 6px !important;
+    transition: all 0.3s ease !important;
+}
+
+.stImage img:hover {
+    border-color: rgba(0,255,136,0.6) !important;
+    box-shadow: 0 0 20px rgba(0,255,136,0.15) !important;
+}
+
+/* ── BUTTONS ── */
+.stButton button {
+    background: linear-gradient(135deg,
+        rgba(0,255,136,0.1), rgba(0,200,255,0.1)) !important;
+    border: 1px solid #00ff88 !important;
+    color: #00ff88 !important;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    transition: all 0.3s ease !important;
+    border-radius: 4px !important;
+}
+
+.stButton button:hover {
+    background: rgba(0,255,136,0.2) !important;
+    box-shadow: 0 0 20px rgba(0,255,136,0.3) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* ── ALERTS ── */
+.stSuccess {
+    background: rgba(0,255,136,0.07) !important;
+    border: 1px solid rgba(0,255,136,0.3) !important;
+    border-radius: 6px !important;
+}
+
+.stError {
+    background: rgba(255,0,85,0.07) !important;
+    border: 1px solid rgba(255,0,85,0.3) !important;
+    border-radius: 6px !important;
+}
+
+.stInfo {
+    background: rgba(0,200,255,0.07) !important;
+    border: 1px solid rgba(0,200,255,0.3) !important;
+    border-radius: 6px !important;
+}
+
+.stWarning {
+    background: rgba(255,180,0,0.07) !important;
+    border: 1px solid rgba(255,180,0,0.3) !important;
+    border-radius: 6px !important;
+}
+
+/* ── SLIDERS ── */
+.stSlider .stSlider > div {
+    color: #00ff88 !important;
+}
+
+/* ── DIVIDER ── */
+hr {
+    border: none !important;
+    border-top: 1px solid rgba(0,255,136,0.15) !important;
+    margin: 1.5rem 0 !important;
+}
+
+/* ── CANVAS MATRIX ── */
+#matrix-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    opacity: 0.03;
+    pointer-events: none;
+}
+
+/* ── SIDEBAR LOGO ── */
+.sidebar-logo {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.sidebar-logo-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #00ff88;
+    text-shadow: 0 0 15px rgba(0,255,136,0.5);
+    letter-spacing: 3px;
+}
+
+.sidebar-info {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: rgba(0,255,136,0.5);
+    letter-spacing: 1px;
+    line-height: 1.8;
+    margin-top: 0.5rem;
+}
+
+/* ── GLITCH ANIMATION ── */
+.glitch {
+    position: relative;
+    animation: glitch 5s infinite;
+}
+
+@keyframes glitch {
+    0%, 90%, 100% { transform: translate(0); }
+    92% { transform: translate(-2px, 1px); filter: hue-rotate(20deg); }
+    94% { transform: translate(2px, -1px); filter: hue-rotate(-20deg); }
+    96% { transform: translate(0); }
+}
+
+/* ── STATUS BADGE ── */
+.status-online {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: #00ff88;
+    letter-spacing: 2px;
+}
+
+.status-dot {
+    width: 8px; height: 8px;
+    background: #00ff88;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #00ff88;
+    animation: pulse-dot 1.5s ease infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+}
+</style>
+
+<!-- Matrix Rain Canvas -->
+<canvas id="matrix-canvas"></canvas>
+<script>
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+const fontSize = 14;
+const cols = Math.floor(canvas.width / fontSize);
+const drops = Array(cols).fill(1);
+function drawMatrix() {
+    ctx.fillStyle = 'rgba(2,11,20,0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff88';
+    ctx.font = fontSize + 'px monospace';
+    drops.forEach((y, i) => {
+        const char = chars[Math.floor(Math.random()*chars.length)];
+        ctx.fillText(char, i*fontSize, y*fontSize);
+        if (y*fontSize > canvas.height && Math.random() > 0.975)
+            drops[i] = 0;
+        drops[i]++;
+    });
+}
+setInterval(drawMatrix, 50);
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
 """, unsafe_allow_html=True)
 
-# ============================================================
-# Sidebar Navigation
-# ============================================================
-
-st.sidebar.image(
-    "https://img.icons8.com/color/96/000000/cyber-security.png",
-    width=80
-)
-st.sidebar.title("🛡️ XGNN IDS")
-st.sidebar.markdown("---")
-
-page = st.sidebar.radio(
-    "Navigate",
-    [
-        "🏠 Home",
-        "📊 Model Results",
-        "🔍 Explainability",
-        "🤖 Live Prediction",
-        "📈 Model Comparison"
-    ]
-)
-
-st.sidebar.markdown("---")
-st.sidebar.markdown("**Author:** Shreyas Santosh Shinde")
-st.sidebar.markdown("**Guide:** Dr. Prabha Kadam")
-st.sidebar.markdown("**College:** Kirti College, Mumbai")
-
 
 # ============================================================
-# Helper - Load Image
+# Sidebar
 # ============================================================
 
-def show_image(path, caption="", width=None):
-    if os.path.exists(path):
-        if width:
-            st.image(path, caption=caption, width=width)
-        else:
-            st.image(path, caption=caption,
-                     use_column_width=True)
-    else:
-        st.warning(f"Image not found: {path}")
-
-
-# ============================================================
-# PAGE 1 - HOME
-# ============================================================
-
-if page == "🏠 Home":
-
-    st.markdown(
-        '<div class="main-title">'
-        '🛡️ Explainable Graph Neural Network<br>'
-        'Intrusion Detection System'
-        '</div>',
-        unsafe_allow_html=True
-    )
-    st.markdown(
-        '<div class="subtitle">'
-        'MSc Computer Science Project — '
-        'Kirti College, Mumbai'
-        '</div>',
-        unsafe_allow_html=True
-    )
+with st.sidebar:
+    st.markdown("""
+    <div class="sidebar-logo">
+        <div class="sidebar-logo-text glitch">⬡ XGNN_IDS</div>
+        <div class="sidebar-info">
+            INTRUSION DETECTION<br>
+            NEURAL SYSTEM v1.0<br>
+            ─────────────────<br>
+            AUTHOR: S.S.SHINDE<br>
+            GUIDE: DR.P.KADAM<br>
+            KIRTI COLLEGE · MUM
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # Key metrics
-    col1, col2, col3, col4 = st.columns(4)
+    st.markdown("""
+    <div class="status-online">
+        <div class="status-dot"></div>
+        SYSTEM ONLINE
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    page = st.radio(
+        "NAVIGATE",
+        [
+            "⬡ HOME",
+            "◈ MODEL RESULTS",
+            "◉ EXPLAINABILITY",
+            "▶ LIVE PREDICTION",
+            "◆ MODEL COMPARISON"
+        ],
+        label_visibility="visible"
+    )
+
+
+# ============================================================
+# Helper
+# ============================================================
+
+def show_image(path, caption=""):
+    if os.path.exists(path):
+        st.image(path, caption=caption,
+                 width="stretch")
+    else:
+        st.warning(f"⚠ Image not found: {path}")
+
+
+def cyber_header(text):
+    st.markdown(
+        f'<div class="cyber-section">{text}</div>',
+        unsafe_allow_html=True
+    )
+
+
+def progress_bar(label, value, css_class,
+                 show_pct=True):
+    pct = f"{value*100:.2f}%" if show_pct else ""
+    st.markdown(f"""
+    <div class="progress-container">
+        <div class="progress-label">
+            <span>{label}</span>
+            <span>{pct}</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill {css_class}"
+                 style="width:{value*100}%"></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ============================================================
+# PAGE 1 — HOME
+# ============================================================
+
+if page == "⬡ HOME":
+
+    st.markdown("""
+    <div class="cyber-header">
+        <div class="cyber-title glitch">
+            EXPLAINABLE GRAPH<br>NEURAL NETWORK IDS
+        </div>
+        <div class="cyber-subtitle">
+            ── MSc Computer Science · Kirti College Mumbai ──
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Metric cards
+    st.markdown("""
+    <div class="metric-grid">
+        <div class="metric-card">
+            <div class="metric-label">GCN ACCURACY</div>
+            <div class="metric-value">93.61%</div>
+            <div class="metric-delta">✦ EXPLAINABLE</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">GAT ACCURACY</div>
+            <div class="metric-value">92.72%</div>
+            <div class="metric-delta">✦ EXPLAINABLE</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">GRAPH NODES</div>
+            <div class="metric-value">25,192</div>
+            <div class="metric-delta">✦ CONNECTIONS</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">FEATURES</div>
+            <div class="metric-value">41</div>
+            <div class="metric-delta">✦ TRAFFIC FEATURES</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    col1, col2 = st.columns(2)
 
     with col1:
-        st.metric("GCN Accuracy", "93.61%",
-                  delta="Explainable ✅")
+        cyber_header("◈ PROJECT OVERVIEW")
+        st.markdown("""
+        <div style="font-family:'Rajdhani',sans-serif;
+                    color:rgba(200,230,255,0.85);
+                    line-height:1.8; font-size:1rem;">
+        This project proposes an <b style="color:#00ff88">
+        Explainable Graph Neural Network (XGNN)</b> based
+        <b style="color:#00ccff">Network Intrusion Detection
+        System</b> that detects cyberattacks with high accuracy
+        while providing <b style="color:#b400ff">
+        human-understandable explanations</b> for every
+        prediction.<br><br>
+        Traditional ML models function as <b style="color:
+        #ff6b00">black boxes</b> — they cannot explain WHY a
+        connection is flagged. In cybersecurity,
+        <b style="color:#00ff88">explainability is as critical
+        as accuracy.</b>
+        </div>
+        """, unsafe_allow_html=True)
+
     with col2:
-        st.metric("GAT Accuracy", "92.72%",
-                  delta="Explainable ✅")
-    with col3:
-        st.metric("Graph Nodes", "25,192",
-                  delta="Network Connections")
-    with col4:
-        st.metric("Features", "41",
-                  delta="Network Traffic Features")
+        cyber_header("◉ METHODOLOGY")
+        st.markdown("""
+        <div style="font-family:'Share Tech Mono',monospace;
+                    font-size:0.82rem; line-height:2;
+                    color:rgba(0,255,136,0.8);">
+        ► DATA PREPROCESSING<br>
+        &nbsp;&nbsp;KDD Cup Dataset · 25,192 connections<br>
+        ► GRAPH CONSTRUCTION<br>
+        &nbsp;&nbsp;Nodes=Connections · Edges=Similar pairs<br>
+        ► GNN MODELS<br>
+        &nbsp;&nbsp;Graph Convolutional Network (GCN)<br>
+        &nbsp;&nbsp;Graph Attention Network (GAT)<br>
+        ► EXPLAINABILITY<br>
+        &nbsp;&nbsp;Feature importance · Subgraph viz<br>
+        &nbsp;&nbsp;Attention weight analysis<br>
+        ► EVALUATION<br>
+        &nbsp;&nbsp;vs Random Forest · MLP baseline
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("---")
+    cyber_header("🌐 NETWORK TRAFFIC GRAPH")
+    show_image("outputs/network_graph.png",
+               "Network traffic as graph — "
+               "Red=Attack · Blue=Normal")
 
-    # Project Overview
+
+# ============================================================
+# PAGE 2 — MODEL RESULTS
+# ============================================================
+
+elif page == "◈ MODEL RESULTS":
+
+    st.markdown(
+        '<div class="cyber-title" '
+        'style="font-size:1.8rem;text-align:left;'
+        'padding:1rem 0;">◈ MODEL RESULTS</div>',
+        unsafe_allow_html=True
+    )
+
+    cyber_header("▸ PERFORMANCE METRICS")
+
+    # Progress bars
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown(
-            '<div class="section-header">'
-            '📌 Project Overview'
-            '</div>',
+            '<div style="font-family:\'Share Tech Mono\','
+            'monospace;color:#00ccff;font-size:0.8rem;'
+            'letter-spacing:2px;margin-bottom:0.8rem;">'
+            '── GNN MODELS ──</div>',
             unsafe_allow_html=True
         )
-        st.markdown("""
-        This project proposes an **Explainable Graph Neural
-        Network (XGNN)** based **Network Intrusion Detection
-        System (IDS)** that not only detects cyberattacks
-        with high accuracy but also provides **human-understandable
-        explanations** for every prediction.
-
-        Traditional ML models like Random Forest achieve high
-        accuracy but function as **black boxes** — they cannot
-        explain WHY a connection is flagged as an attack.
-
-        In cybersecurity, **explainability is as critical as
-        accuracy** — a security analyst needs to understand
-        the reasoning behind every alert.
-        """)
+        progress_bar("GCN  ACCURACY", 0.9361,
+                     "progress-gcn")
+        progress_bar("GCN  F1-SCORE", 0.9302,
+                     "progress-gcn")
+        progress_bar("GCN  ROC-AUC", 0.9856,
+                     "progress-gcn")
+        st.markdown("<br>", unsafe_allow_html=True)
+        progress_bar("GAT  ACCURACY", 0.9272,
+                     "progress-gat")
+        progress_bar("GAT  F1-SCORE", 0.9199,
+                     "progress-gat")
+        progress_bar("GAT  ROC-AUC", 0.9732,
+                     "progress-gat")
 
     with col2:
         st.markdown(
-            '<div class="section-header">'
-            '🔬 Methodology'
-            '</div>',
+            '<div style="font-family:\'Share Tech Mono\','
+            'monospace;color:#ff6b00;font-size:0.8rem;'
+            'letter-spacing:2px;margin-bottom:0.8rem;">'
+            '── BASELINE MODELS ──</div>',
             unsafe_allow_html=True
         )
-        st.markdown("""
-        **1. Data Preprocessing**
-        - KDD Cup Network Intrusion Dataset
-        - 25,192 network connections
-        - 41 traffic features
+        progress_bar("RF   ACCURACY", 0.9962,
+                     "progress-rf")
+        progress_bar("RF   F1-SCORE", 0.9959,
+                     "progress-rf")
+        progress_bar("RF   ROC-AUC", 0.9999,
+                     "progress-rf")
+        st.markdown("<br>", unsafe_allow_html=True)
+        progress_bar("MLP  ACCURACY", 0.9940,
+                     "progress-mlp")
+        progress_bar("MLP  F1-SCORE", 0.9936,
+                     "progress-mlp")
+        progress_bar("MLP  ROC-AUC", 0.9988,
+                     "progress-mlp")
 
-        **2. Graph Construction**
-        - Nodes = Network connections
-        - Edges = Similar protocol/service pairs
-        - Graph with 25,192 nodes and 25,124 edges
-
-        **3. GNN Models**
-        - Graph Convolutional Network (GCN)
-        - Graph Attention Network (GAT)
-
-        **4. Explainability**
-        - Feature importance via gradients
-        - Subgraph visualization
-        - Attention weight analysis
-        """)
-
-    st.markdown("---")
-
-    # Network graph
-    st.markdown(
-        '<div class="section-header">'
-        '🌐 Network Traffic Graph'
-        '</div>',
-        unsafe_allow_html=True
-    )
-    show_image("outputs/network_graph.png",
-               "Network traffic represented as a graph "
-               "— Red nodes = Attacks, Blue = Normal")
-
-
-# ============================================================
-# PAGE 2 - MODEL RESULTS
-# ============================================================
-
-elif page == "📊 Model Results":
-
-    st.title("📊 Model Training Results")
-    st.markdown("Performance of GCN and GAT models "
-                "during training.")
     st.markdown("---")
 
     # Results table
-    st.markdown(
-        '<div class="section-header">'
-        '🏆 Final Performance Metrics'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
+    cyber_header("▸ FULL COMPARISON TABLE")
     results_df = pd.DataFrame({
-        'Model': ['GCN', 'GAT',
-                  'Random Forest', 'MLP Neural Network'],
-        'Accuracy': ['93.61%', '92.72%',
+        'MODEL': ['GCN', 'GAT',
+                  'Random Forest', 'MLP'],
+        'ACCURACY': ['93.61%', '92.72%',
                      '99.62%', '99.40%'],
-        'Precision': ['0.9471', '0.9436',
+        'PRECISION': ['0.9471', '0.9436',
                       '0.9979', '0.9936'],
-        'Recall': ['0.9140', '0.8974',
+        'RECALL': ['0.9140', '0.8974',
                    '0.9940', '0.9936'],
-        'F1-Score': ['0.9302', '0.9199',
-                     '0.9959', '0.9936'],
+        'F1': ['0.9302', '0.9199',
+               '0.9959', '0.9936'],
         'ROC-AUC': ['0.9856', '0.9732',
                     '0.9999', '0.9988'],
-        'Explainable': ['✅ Yes', '✅ Yes',
-                        '❌ No', '❌ No']
+        'EXPLAINABLE': ['✅ YES', '✅ YES',
+                        '❌ NO', '❌ NO']
     })
-
-    st.dataframe(
-        results_df,
-        use_container_width=True,
-        hide_index=True
-    )
+    st.dataframe(results_df,
+                 use_container_width=True,
+                 hide_index=True)
 
     st.info(
-        "💡 While Random Forest achieves higher accuracy, "
-        "GCN and GAT provide explainable decisions — "
+        "💡 Random Forest achieves higher raw accuracy "
+        "but GCN/GAT provide explainable decisions — "
         "critical for real-world cybersecurity deployment."
     )
 
     st.markdown("---")
 
-    # Training curves
     col1, col2 = st.columns(2)
-
     with col1:
-        st.markdown(
-            '<div class="section-header">'
-            'GCN Training Results'
-            '</div>',
-            unsafe_allow_html=True
-        )
-        show_image("outputs/gcn_training_results.png",
-                   "GCN Loss and Accuracy curves")
-
+        cyber_header("▸ GCN TRAINING CURVES")
+        show_image("outputs/gcn_training_results.png")
     with col2:
-        st.markdown(
-            '<div class="section-header">'
-            'GAT Training Results'
-            '</div>',
-            unsafe_allow_html=True
-        )
-        show_image("outputs/gat_training_results.png",
-                   "GAT Loss and Accuracy curves")
+        cyber_header("▸ GAT TRAINING CURVES")
+        show_image("outputs/gat_training_results.png")
 
     st.markdown("---")
-
-    # Confusion matrices
-    st.markdown(
-        '<div class="section-header">'
-        '📊 Confusion Matrices'
-        '</div>',
-        unsafe_allow_html=True
-    )
-    show_image("outputs/confusion_matrices.png",
-               "Confusion matrices for all models")
+    cyber_header("▸ CONFUSION MATRICES")
+    show_image("outputs/confusion_matrices.png")
 
     st.markdown("---")
-
-    # ROC curves
-    st.markdown(
-        '<div class="section-header">'
-        '📈 ROC Curves'
-        '</div>',
-        unsafe_allow_html=True
-    )
-    show_image("outputs/roc_curves.png",
-               "ROC curves for all models")
+    cyber_header("▸ ROC CURVES")
+    show_image("outputs/roc_curves.png")
 
 
 # ============================================================
-# PAGE 3 - EXPLAINABILITY
+# PAGE 3 — EXPLAINABILITY
 # ============================================================
 
-elif page == "🔍 Explainability":
+elif page == "◉ EXPLAINABILITY":
 
-    st.title("🔍 Model Explainability Analysis")
     st.markdown(
-        "Understanding WHY the model makes each prediction."
-    )
-    st.markdown("---")
-
-    # Feature importance
-    st.markdown(
-        '<div class="section-header">'
-        '⭐ Feature Importance Analysis'
-        '</div>',
+        '<div class="cyber-title" '
+        'style="font-size:1.8rem;text-align:left;'
+        'padding:1rem 0;">◉ EXPLAINABILITY ANALYSIS</div>',
         unsafe_allow_html=True
     )
+
+    cyber_header("▸ FEATURE IMPORTANCE")
     st.markdown(
-        "The most important network traffic features "
-        "for detecting intrusions:"
+        '<div style="font-family:\'Share Tech Mono\','
+        'monospace;color:rgba(0,200,255,0.7);'
+        'font-size:0.8rem;letter-spacing:1px;">'
+        'Most critical network features '
+        'for intrusion detection:</div>',
+        unsafe_allow_html=True
     )
 
     col1, col2 = st.columns(2)
     with col1:
-        show_image(
-            "outputs/gcn_feature_importance.png",
-            "GCN — Top 15 Important Features"
+        st.markdown(
+            '<div style="font-family:\'Share Tech Mono\','
+            'monospace;color:#00ff88;font-size:0.75rem;'
+            'letter-spacing:2px;margin:0.5rem 0;">'
+            '── GCN FEATURES ──</div>',
+            unsafe_allow_html=True
         )
+        show_image("outputs/gcn_feature_importance.png")
     with col2:
-        show_image(
-            "outputs/gat_feature_importance.png",
-            "GAT — Top 15 Important Features"
+        st.markdown(
+            '<div style="font-family:\'Share Tech Mono\','
+            'monospace;color:#b400ff;font-size:0.75rem;'
+            'letter-spacing:2px;margin:0.5rem 0;">'
+            '── GAT FEATURES ──</div>',
+            unsafe_allow_html=True
         )
+        show_image("outputs/gat_feature_importance.png")
 
     st.success(
-        "🔑 **Key Finding:** `wrong_fragment` is the most "
-        "important feature in both models — a classic "
-        "indicator of network attacks!"
+        "🔑 KEY FINDING: `wrong_fragment` is the #1 "
+        "feature in BOTH models — a classic network "
+        "attack indicator confirmed by both GCN and GAT!"
     )
 
     st.markdown("---")
-
-    # Subgraph
-    st.markdown(
-        '<div class="section-header">'
-        '🕸️ Attack Subgraph Explanation'
-        '</div>',
-        unsafe_allow_html=True
-    )
-    st.markdown(
-        "Visualizing the neighborhood of an attack node "
-        "to understand attack propagation paths:"
-    )
-    show_image(
-        "outputs/gcn_subgraph_node_2.png",
-        "Subgraph explanation — Yellow=Target, "
-        "Red=Attack, Blue=Normal"
-    )
+    cyber_header("▸ ATTACK SUBGRAPH EXPLANATION")
+    show_image("outputs/gcn_subgraph_node_2.png",
+               "Yellow=Target · Red=Attack · Blue=Normal")
 
     st.markdown("---")
-
-    # Attention weights
-    st.markdown(
-        '<div class="section-header">'
-        '👁️ GAT Attention Weights'
-        '</div>',
-        unsafe_allow_html=True
-    )
+    cyber_header("▸ GAT ATTENTION WEIGHTS")
 
     col1, col2 = st.columns(2)
     with col1:
-        show_image(
-            "outputs/gat_attention_weights.png",
-            "GAT Attention Weight Distribution"
-        )
+        show_image("outputs/gat_attention_weights.png")
     with col2:
-        show_image(
-            "outputs/attention_per_head.png",
-            "Attention weights per head"
-        )
+        show_image("outputs/attention_per_head.png")
 
     st.markdown("---")
-
     col1, col2 = st.columns(2)
     with col1:
-        show_image(
-            "outputs/top_attended_nodes.png",
-            "Top 50 most attended edges"
-        )
+        show_image("outputs/top_attended_nodes.png")
     with col2:
         show_image(
-            "outputs/attack_vs_normal_attention.png",
-            "Attack vs Normal attention comparison"
+            "outputs/attack_vs_normal_attention.png"
         )
 
 
 # ============================================================
-# PAGE 4 - LIVE PREDICTION
+# PAGE 4 — LIVE PREDICTION
 # ============================================================
 
-elif page == "🤖 Live Prediction":
+elif page == "▶ LIVE PREDICTION":
 
-    st.title("🤖 Live Intrusion Detection")
     st.markdown(
-        "Enter network connection features to predict "
-        "if it is an attack or normal traffic."
+        '<div class="cyber-title" '
+        'style="font-size:1.8rem;text-align:left;'
+        'padding:1rem 0;">▶ LIVE INTRUSION DETECTION</div>',
+        unsafe_allow_html=True
     )
-    st.markdown("---")
 
-    st.info(
-        "💡 Adjust the sliders below to simulate "
-        "different network connections. "
-        "The model will predict in real time!"
+    st.markdown(
+        '<div style="font-family:\'Share Tech Mono\','
+        'monospace;color:rgba(0,200,255,0.7);'
+        'font-size:0.82rem;letter-spacing:1px;">'
+        'Adjust network parameters to simulate '
+        'connections and detect intrusions in real time.'
+        '</div><br>',
+        unsafe_allow_html=True
     )
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("**Connection Features**")
-        duration = st.slider(
-            "Duration", 0, 100, 0
-        )
+        cyber_header("CONNECTION")
+        duration = st.slider("Duration", 0, 100, 0)
         protocol = st.selectbox(
-            "Protocol Type",
-            ["tcp", "udp", "icmp"]
+            "Protocol", ["tcp", "udp", "icmp"]
         )
         wrong_fragment = st.slider(
             "Wrong Fragments", 0, 10, 0
         )
-        hot = st.slider(
-            "Hot Indicators", 0, 30, 0
-        )
-        logged_in = st.selectbox(
-            "Logged In", [0, 1]
-        )
+        hot = st.slider("Hot Indicators", 0, 30, 0)
+        logged_in = st.selectbox("Logged In", [0, 1])
 
     with col2:
-        st.markdown("**Traffic Statistics**")
-        count = st.slider(
-            "Count", 0, 512, 1
-        )
+        cyber_header("TRAFFIC STATS")
+        count = st.slider("Count", 0, 512, 1)
         srv_count = st.slider(
             "Service Count", 0, 512, 1
         )
         same_srv_rate = st.slider(
-            "Same Service Rate", 0.0, 1.0, 1.0
+            "Same Srv Rate", 0.0, 1.0, 1.0
         )
         serror_rate = st.slider(
             "SYN Error Rate", 0.0, 1.0, 0.0
@@ -470,7 +900,7 @@ elif page == "🤖 Live Prediction":
         )
 
     with col3:
-        st.markdown("**Host Statistics**")
+        cyber_header("HOST STATS")
         dst_host_count = st.slider(
             "Dst Host Count", 0, 255, 100
         )
@@ -478,185 +908,223 @@ elif page == "🤖 Live Prediction":
             "Dst Host Srv Count", 0, 255, 100
         )
         dst_host_same_srv_rate = st.slider(
-            "Dst Host Same Srv Rate", 0.0, 1.0, 1.0
+            "Dst Host Srv Rate", 0.0, 1.0, 1.0
         )
         dst_host_serror_rate = st.slider(
-            "Dst Host SYN Error Rate", 0.0, 1.0, 0.0
+            "Dst SYN Error", 0.0, 1.0, 0.0
         )
         dst_host_rerror_rate = st.slider(
-            "Dst Host REJ Error Rate", 0.0, 1.0, 0.0
+            "Dst REJ Error", 0.0, 1.0, 0.0
         )
 
     st.markdown("---")
 
-    if st.button("🔍 Predict", type="primary",
+    if st.button("⚡ ANALYZE CONNECTION",
                  use_container_width=True):
 
-        # Simple rule-based prediction for demo
-        # (since loading full GNN model requires graph)
         attack_score = 0
+        reasons = []
 
         if wrong_fragment > 0:
             attack_score += 3
+            reasons.append(
+                f"⚠ Wrong fragments: {wrong_fragment} "
+                f"— strong attack indicator"
+            )
         if serror_rate > 0.5:
             attack_score += 2
+            reasons.append(
+                f"⚠ SYN error rate: {serror_rate:.2f} "
+                f"— possible SYN flood attack"
+            )
         if rerror_rate > 0.5:
             attack_score += 2
+            reasons.append(
+                f"⚠ REJ error rate: {rerror_rate:.2f} "
+                f"— port scanning detected"
+            )
         if dst_host_serror_rate > 0.5:
             attack_score += 2
+            reasons.append(
+                f"⚠ Host SYN error: "
+                f"{dst_host_serror_rate:.2f} "
+                f"— host under attack"
+            )
         if dst_host_rerror_rate > 0.5:
-            attack_score += 2
+            attack_score += 1
+            reasons.append(
+                f"⚠ Host REJ error: "
+                f"{dst_host_rerror_rate:.2f}"
+            )
         if hot > 5:
             attack_score += 1
+            reasons.append(
+                f"⚠ Hot indicators: {hot} — "
+                f"suspicious activity"
+            )
         if count > 200:
             attack_score += 1
-        if logged_in == 0 and duration > 0:
-            attack_score += 1
+            reasons.append(
+                f"⚠ High count: {count} — "
+                f"possible flood"
+            )
 
         confidence = min(
             0.5 + (attack_score * 0.06), 0.99
         )
 
         if attack_score >= 3:
-            st.error(
-                f"🚨 **ATTACK DETECTED!**\n\n"
-                f"Confidence: {confidence*100:.1f}%\n\n"
-                f"The model has flagged this connection "
-                f"as a potential network intrusion."
-            )
-            st.markdown("**Key indicators detected:**")
-            if wrong_fragment > 0:
+            st.markdown(f"""
+            <div style="background:rgba(255,0,85,0.08);
+                        border:1px solid rgba(255,0,85,0.4);
+                        border-radius:8px;padding:1.5rem;
+                        margin:1rem 0;
+                        font-family:'Orbitron',monospace;">
+                <div style="color:#ff0055;font-size:1.4rem;
+                            font-weight:700;
+                            text-shadow:0 0 15px #ff0055;
+                            letter-spacing:3px;">
+                    🚨 INTRUSION DETECTED
+                </div>
+                <div style="color:rgba(255,100,100,0.8);
+                            font-size:0.85rem;margin-top:0.5rem;
+                            font-family:'Share Tech Mono',
+                            monospace;letter-spacing:2px;">
+                    CONFIDENCE: {confidence*100:.1f}% ·
+                    THREAT LEVEL: {'CRITICAL' if attack_score >= 6 else 'HIGH'}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            cyber_header("▸ THREAT INDICATORS")
+            for r in reasons:
                 st.markdown(
-                    f"- ⚠️ Wrong fragments: "
-                    f"{wrong_fragment} "
-                    f"(strong attack indicator)"
-                )
-            if serror_rate > 0.5:
-                st.markdown(
-                    f"- ⚠️ High SYN error rate: "
-                    f"{serror_rate:.2f} "
-                    f"(possible SYN flood)"
-                )
-            if rerror_rate > 0.5:
-                st.markdown(
-                    f"- ⚠️ High REJ error rate: "
-                    f"{rerror_rate:.2f} "
-                    f"(port scanning detected)"
+                    f'<div style="font-family:\'Share Tech '
+                    f'Mono\',monospace;color:#ff6b6b;'
+                    f'font-size:0.82rem;padding:4px 0;'
+                    f'letter-spacing:1px;">{r}</div>',
+                    unsafe_allow_html=True
                 )
         else:
-            normal_conf = 1 - confidence + 0.4
-            normal_conf = min(normal_conf, 0.99)
-            st.success(
-                f"✅ **NORMAL TRAFFIC**\n\n"
-                f"Confidence: {normal_conf*100:.1f}%\n\n"
-                f"This connection appears to be "
-                f"legitimate network traffic."
-            )
+            normal_conf = min(0.9 - attack_score*0.05,
+                              0.99)
+            st.markdown(f"""
+            <div style="background:rgba(0,255,136,0.06);
+                        border:1px solid rgba(0,255,136,0.3);
+                        border-radius:8px;padding:1.5rem;
+                        margin:1rem 0;
+                        font-family:'Orbitron',monospace;">
+                <div style="color:#00ff88;font-size:1.4rem;
+                            font-weight:700;
+                            text-shadow:0 0 15px #00ff88;
+                            letter-spacing:3px;">
+                    ✅ NORMAL TRAFFIC
+                </div>
+                <div style="color:rgba(0,255,136,0.7);
+                            font-size:0.85rem;margin-top:0.5rem;
+                            font-family:'Share Tech Mono',
+                            monospace;letter-spacing:2px;">
+                    CONFIDENCE: {normal_conf*100:.1f}% ·
+                    STATUS: SAFE
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-        # Show feature summary
+        # Feature risk table
         st.markdown("---")
-        st.markdown("**Connection Summary:**")
-        summary_df = pd.DataFrame({
-            'Feature': [
-                'Duration', 'Wrong Fragments',
-                'Hot Indicators', 'Count',
-                'SYN Error Rate', 'REJ Error Rate',
-                'Dst Host SYN Error', 'Logged In'
+        cyber_header("▸ FEATURE RISK ANALYSIS")
+        risk_df = pd.DataFrame({
+            'FEATURE': [
+                'Wrong Fragments', 'SYN Error Rate',
+                'REJ Error Rate', 'Hot Indicators',
+                'Connection Count', 'Logged In'
             ],
-            'Value': [
-                duration, wrong_fragment,
-                hot, count,
-                serror_rate, rerror_rate,
-                dst_host_serror_rate, logged_in
+            'VALUE': [
+                wrong_fragment, serror_rate,
+                rerror_rate, hot, count, logged_in
             ],
-            'Risk Level': [
-                'Low' if duration < 50 else 'Medium',
-                '🔴 High' if wrong_fragment > 0 else '🟢 Low',
-                '🟡 Medium' if hot > 5 else '🟢 Low',
-                '🟡 Medium' if count > 200 else '🟢 Low',
-                '🔴 High' if serror_rate > 0.5 else '🟢 Low',
-                '🔴 High' if rerror_rate > 0.5 else '🟢 Low',
-                '🔴 High' if dst_host_serror_rate > 0.5
-                else '🟢 Low',
-                '🟢 Safe' if logged_in == 1 else '🟡 Unknown'
+            'RISK': [
+                '🔴 HIGH' if wrong_fragment > 0
+                else '🟢 LOW',
+                '🔴 HIGH' if serror_rate > 0.5
+                else '🟢 LOW',
+                '🔴 HIGH' if rerror_rate > 0.5
+                else '🟢 LOW',
+                '🟡 MED' if hot > 5 else '🟢 LOW',
+                '🟡 MED' if count > 200 else '🟢 LOW',
+                '🟢 SAFE' if logged_in == 1
+                else '🟡 UNKNOWN'
             ]
         })
-        st.dataframe(
-            summary_df,
-            use_container_width=True,
-            hide_index=True
-        )
+        st.dataframe(risk_df,
+                     use_container_width=True,
+                     hide_index=True)
 
 
 # ============================================================
-# PAGE 5 - MODEL COMPARISON
+# PAGE 5 — MODEL COMPARISON
 # ============================================================
 
-elif page == "📈 Model Comparison":
+elif page == "◆ MODEL COMPARISON":
 
-    st.title("📈 Model Comparison Analysis")
     st.markdown(
-        "Detailed comparison between XGNN models "
-        "and traditional ML baselines."
-    )
-    st.markdown("---")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        show_image(
-            "outputs/radar_chart.png",
-            "Radar chart — all models across all metrics"
-        )
-    with col2:
-        show_image(
-            "outputs/metrics_heatmap.png",
-            "Metrics heatmap"
-        )
-
-    st.markdown("---")
-
-    show_image(
-        "outputs/accuracy_vs_explainability.png",
-        "Accuracy vs Explainability tradeoff — "
-        "the key argument of this research"
-    )
-
-    st.markdown("---")
-
-    show_image(
-        "outputs/model_comparison.png",
-        "Full model comparison across all metrics"
-    )
-
-    st.markdown("---")
-
-    # Key findings
-    st.markdown(
-        '<div class="section-header">'
-        '💡 Key Research Findings'
-        '</div>',
+        '<div class="cyber-title" '
+        'style="font-size:1.8rem;text-align:left;'
+        'padding:1rem 0;">◆ MODEL COMPARISON</div>',
         unsafe_allow_html=True
     )
 
     col1, col2 = st.columns(2)
-
     with col1:
+        cyber_header("▸ RADAR CHART")
+        show_image("outputs/radar_chart.png")
+    with col2:
+        cyber_header("▸ METRICS HEATMAP")
+        show_image("outputs/metrics_heatmap.png")
+
+    st.markdown("---")
+    cyber_header("▸ ACCURACY vs EXPLAINABILITY")
+    show_image("outputs/accuracy_vs_explainability.png",
+               "Key research argument — "
+               "XGNN achieves high explainability "
+               "with competitive accuracy")
+
+    st.markdown("---")
+    cyber_header("▸ FULL MODEL COMPARISON")
+    show_image("outputs/model_comparison.png")
+
+    st.markdown("---")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        cyber_header("▸ WHY XGNN WINS")
         st.success("""
-        **Why XGNN models are preferred:**
-        - ✅ Provide human-understandable explanations
-        - ✅ Show WHICH features triggered the alert
-        - ✅ Visualize attack propagation paths
-        - ✅ GAT attention shows WHICH connections matter
-        - ✅ Suitable for real-world deployment
+        ✅ Explainable decisions
+        ✅ Shows WHICH features triggered alert
+        ✅ Visualizes attack propagation paths
+        ✅ GAT attention maps critical connections
+        ✅ Suitable for real-world deployment
+        ✅ Graph-aware — understands relationships
+        """)
+    with col2:
+        cyber_header("▸ BASELINE LIMITATIONS")
+        st.warning("""
+        ❌ Random Forest — black box
+        ❌ MLP — no feature attribution
+        ❌ Cannot justify decisions to analysts
+        ❌ Difficult to audit in production
+        ❌ No graph structure awareness
+        ❌ Cannot explain attack pathways
         """)
 
-    with col2:
-        st.warning("""
-        **Limitation of traditional models:**
-        - ❌ Random Forest — black box, no explanation
-        - ❌ MLP — no feature attribution
-        - ❌ Cannot justify decisions to analysts
-        - ❌ Difficult to audit or trust in production
-        - ❌ No graph structure awareness
-        """)
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align:center;
+                font-family:'Share Tech Mono',monospace;
+                color:rgba(0,255,136,0.4);
+                font-size:0.75rem;letter-spacing:3px;
+                padding:1rem;">
+        XGNN IDS · SHREYAS SANTOSH SHINDE ·
+        KIRTI COLLEGE MUMBAI · 2026
+    </div>
+    """, unsafe_allow_html=True)
