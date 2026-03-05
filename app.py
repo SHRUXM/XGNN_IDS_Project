@@ -1660,7 +1660,7 @@ elif page == "📂 CUSTOM DATASET":
                 JUST UPLOAD — NO SETUP NEEDED<br>
                 THE SYSTEM DOES EVERYTHING AUTOMATICALLY<br>
                 ────────────────────────────<br>
-                ► KDD CUP 1999 &nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/galaxyh/kdd-cup-1999-data" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
+                ► KDD CUP 1999 &nbsp;⭐ TRAINED &nbsp;<a href="https://raw.githubusercontent.com/baonq-me/kdd-cup-1999/master/kddcup.data_10_percent.csv" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
                 ► NSL-KDD &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅ &nbsp;<a href="https://raw.githubusercontent.com/defcom17/NSL_KDD/master/KDDTest%2B.csv" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
                 ► CIC-IDS-2017 &nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/chethuhn/network-intrusion-dataset" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
                 ► UNSW-NB15 &nbsp;&nbsp;&nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/mrwellsdavid/unsw-nb15" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
