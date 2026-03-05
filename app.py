@@ -1185,14 +1185,54 @@ elif page == "📂 CUSTOM DATASET":
 
         try:
             df = pd.read_csv(uploaded_file)
-            st.success(
-                f"✅ File uploaded successfully! "
-                f"{df.shape[0]} rows · "
-                f"{df.shape[1]} columns detected"
-            )
         except Exception as e:
             st.error(f"❌ Could not read file: {e}")
             st.stop()
+
+        # ── Cybersecurity Dataset Validator ──
+        REQUIRED_KEYWORDS = [
+            'duration', 'protocol', 'service', 'flag',
+            'src_bytes', 'dst_bytes', 'land', 'wrong_fragment',
+            'urgent', 'hot', 'count', 'serror', 'rerror',
+            'attack', 'label', 'class', 'category',
+            'packet', 'port', 'ip', 'tcp', 'udp', 'icmp',
+            'flow', 'bytes', 'traffic', 'connection',
+            'syn', 'ack', 'fin', 'rst', 'intrusion'
+        ]
+
+        col_lower = [c.lower() for c in df.columns]
+        matched = [
+            kw for kw in REQUIRED_KEYWORDS
+            if any(kw in col for col in col_lower)
+        ]
+
+        if len(matched) < 3:
+            st.error("❌ INVALID DATASET — This does not appear to be a cybersecurity/network traffic dataset.")
+            st.markdown("""
+            <div style="background:rgba(255,0,85,0.06);
+                        border:1px solid rgba(255,0,85,0.3);
+                        border-radius:8px;padding:1.5rem;
+                        font-family:'Share Tech Mono',monospace;
+                        font-size:0.82rem;
+                        color:rgba(255,100,100,0.9);
+                        letter-spacing:1px;line-height:2;">
+                ⚠ SYSTEM ONLY ACCEPTS NETWORK TRAFFIC DATASETS<br>
+                ────────────────────────────────────────<br>
+                ✅ ALLOWED: KDD Cup 1999, NSL-KDD, CIC-IDS-2017, UNSW-NB15<br>
+                ❌ REJECTED: Sales data, medical data, general CSV files<br>
+                ────────────────────────────────────────<br>
+                YOUR FILE COLUMNS DETECTED:<br>
+            """ + "<br>".join([f"&nbsp;&nbsp;• {c}" for c in df.columns[:10]]) + """
+            </div>
+            """, unsafe_allow_html=True)
+            st.stop()
+
+        st.success(
+            f"✅ Valid cybersecurity dataset detected! "
+            f"{df.shape[0]} rows · "
+            f"{df.shape[1]} columns · "
+            f"{len(matched)} network features matched"
+        )
 
         # ── Preview ──
         cyber_header("▸ DATASET PREVIEW")
