@@ -1,15 +1,7 @@
-streamlit==1.54.0
-
-torch==2.8.0
-torchvision==0.23.0
-torchaudio==2.8.0
-
-numpy
+streamlit>=1.40.0
 pandas
+numpy
 scikit-learn
 matplotlib
 seaborn
 networkx
-
-captum
-torch-geometric
