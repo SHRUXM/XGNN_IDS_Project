@@ -1251,7 +1251,6 @@ elif page == "📂 CUSTOM DATASET":
                 "🔍 Analyzing... please wait"
             ):
                 try:
-                    import torch
                     import matplotlib
                     matplotlib.use('Agg')
                     import matplotlib.pyplot as plt
