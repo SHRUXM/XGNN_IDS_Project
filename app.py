@@ -1661,7 +1661,7 @@ elif page == "📂 CUSTOM DATASET":
                 JUST UPLOAD — NO SETUP NEEDED<br>
                 THE SYSTEM DOES EVERYTHING AUTOMATICALLY<br>
                 ────────────────────────────<br>
-                ► KDD CUP 1999 &nbsp;✅ &nbsp;<a href="https://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
+                ► KDD CUP 1999 &nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/galaxyh/kdd-cup-1999-data" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
                 ► NSL-KDD &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅ &nbsp;<a href="https://www.unb.ca/cic/datasets/nsl.html" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
                 ► CIC-IDS-2017 &nbsp;✅ &nbsp;<a href="https://www.unb.ca/cic/datasets/ids-2017.html" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
                 ► UNSW-NB15 &nbsp;&nbsp;&nbsp;✅ &nbsp;<a href="https://research.unsw.edu.au/projects/unsw-nb15-dataset" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
