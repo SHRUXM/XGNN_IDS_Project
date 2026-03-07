@@ -1380,7 +1380,12 @@ elif page == "◆ MODEL COMPARISON":
             margin=dict(t=30, b=30),
             height=400
         )
-        st.plotly_chart(fig_radar, use_container_width=True)
+        st.plotly_chart(fig_radar, use_container_width=True,
+                        config={
+                            'displayModeBar': True,
+                            'modeBarButtonsToRemove': [],
+                            'displaylogo': False
+                        })
         graph_explanation(
             "The interactive radar chart provides a multi-dimensional comparison of all four models. "
             "<b style='color:#00ff88'>Hover over any point</b> to see exact values. "
