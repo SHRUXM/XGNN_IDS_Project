@@ -1661,6 +1661,14 @@ elif page == "📂 CUSTOM DATASET":
                     plt.tight_layout()
                     st.pyplot(fig)
                     plt.close()
+                    graph_explanation(
+                        "The feature importance chart ranks the most influential network traffic "
+                        "features for detecting intrusions in your uploaded dataset. "
+                        "<b style='color:#00ff88'>Longer bars indicate higher importance</b>. "
+                        "Features with high scores are the primary drivers of the attack "
+                        "classification — use these to understand what patterns in your dataset "
+                        "are most associated with malicious activity."
+                    )
 
                     st.markdown("---")
 
@@ -1727,6 +1735,14 @@ elif page == "📂 CUSTOM DATASET":
                     plt.tight_layout()
                     st.pyplot(fig2)
                     plt.close()
+                    graph_explanation(
+                        "The network graph visualizes a sample of 150 connections from your dataset. "
+                        "<b style='color:#ff0055'>Red nodes</b> are connections classified as attacks "
+                        "while <b style='color:#00ff88'>green nodes</b> are normal traffic. "
+                        "Clusters of red nodes indicate coordinated attack patterns, while isolated "
+                        "red nodes may represent stealthy intrusion attempts. This graph-based view "
+                        "reveals structural attack patterns that tabular analysis alone cannot detect."
+                    )
 
                     st.markdown("---")
 
