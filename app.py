@@ -1349,15 +1349,37 @@ elif page == "◆ MODEL COMPARISON":
     with col1:
         cyber_header("▸ INTERACTIVE RADAR CHART")
         import plotly.graph_objects as go
-        categories = ['Accuracy', 'Precision',
-                      'Recall', 'F1-Score', 'ROC-AUC']
-        fig_radar = go.Figure()
-        models_data = {
+        import json
+
+        default_metrics = {
             'GCN':           [93.61, 94.71, 91.40, 93.02, 98.56],
             'GAT':           [92.72, 94.36, 89.74, 91.99, 97.32],
             'Random Forest': [99.62, 99.79, 99.40, 99.59, 99.99],
             'MLP':           [99.40, 99.36, 99.36, 99.36, 99.88],
         }
+
+        if st.button("🔄 REGENERATE FROM TRAINED METRICS",
+                     use_container_width=True):
+            st.session_state['radar_refreshed'] = True
+
+        metrics_path = "outputs/metrics.json"
+        if os.path.exists(metrics_path):
+            try:
+                with open(metrics_path, "r") as f:
+                    loaded = json.load(f)
+                models_data = loaded
+                st.success("✔ Loaded live metrics from outputs/metrics.json")
+            except Exception:
+                models_data = default_metrics
+                st.warning("⚠ Could not read metrics.json — using default values")
+        else:
+            models_data = default_metrics
+            if st.session_state.get('radar_refreshed'):
+                st.info("ℹ outputs/metrics.json not found — using trained default values")
+
+        categories = ['Accuracy', 'Precision',
+                      'Recall', 'F1-Score', 'ROC-AUC']
+        fig_radar = go.Figure()
         colors = ['#00ff88', '#b400ff', '#ff6b00', '#ff0055']
         fill_colors = [
             'rgba(0,255,136,0.08)',
@@ -1380,8 +1402,8 @@ elif page == "◆ MODEL COMPARISON":
             polar=dict(
                 bgcolor='#020b14',
                 radialaxis=dict(
-                    visible=True, range=[85, 100],
-                    gridcolor='rgba(0,255,136,0.15)',
+                    visible=True, range=[88, 101],
+                    tickvals=[89, 91, 93, 95, 97, 99],
                     tickfont=dict(color='#00ccff',
                                   size=9)
                 ),
