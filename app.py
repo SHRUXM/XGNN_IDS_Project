@@ -1360,17 +1360,11 @@ elif page == "◆ MODEL COMPARISON":
 
         if st.button("🔄 RESET TO TRAINED METRICS",
                      use_container_width=True):
-            st.session_state['radar_reset'] = True
-
-        if st.session_state.get('radar_reset'):
-            models_data = default_metrics
             st.success("✔ Chart reset to original trained metrics")
 
-        if not st.session_state.get('radar_reset'):
-            models_data = default_metrics
-            
+        models_data = default_metrics
+
         categories = ['Accuracy', 'Precision',
-                      'Recall', 'F1-Score', 'ROC-AUC']
         fig_radar = go.Figure()
         colors = ['#00ff88', '#b400ff', '#ff6b00', '#ff0055']
         fill_colors = [
