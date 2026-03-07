@@ -1363,12 +1363,12 @@ elif page == "◆ MODEL COMPARISON":
                 line=dict(color=color, width=2),
                 fillcolor=fill
             ))
-        fig_radar.update_layout(
+         fig_radar.update_layout(
             polar=dict(
                 bgcolor='#020b14',
                 radialaxis=dict(
-                    visible=True, range=[88, 101],
-                    tickvals=[89, 91, 93, 95, 97, 99],
+                    visible=True,
+                    autorange=True,
                     tickfont=dict(color='#00ccff',
                                   size=9)
                 ),
