@@ -637,62 +637,41 @@ if page == "⬡ HOME":
 
     # Metric cards
     st.markdown("""
+    <style>
+    @keyframes countup1 {
+        0%   { opacity:0; transform: translateY(10px); }
+        100% { opacity:1; transform: translateY(0); }
+    }
+    .metric-value-anim {
+        animation: countup1 0.8s ease forwards;
+    }
+    </style>
     <div class="metric-grid">
         <div class="metric-card">
             <div class="metric-label">GCN ACCURACY</div>
-            <div class="metric-value">
-                <span class="counter" data-target="93.61" data-suffix="%">0%</span>
-            </div>
+            <div class="metric-value metric-value-anim"
+                 style="animation-delay:0.1s">93.61%</div>
             <div class="metric-delta">✦ EXPLAINABLE</div>
         </div>
         <div class="metric-card">
             <div class="metric-label">GAT ACCURACY</div>
-            <div class="metric-value">
-                <span class="counter" data-target="92.72" data-suffix="%">0%</span>
-            </div>
+            <div class="metric-value metric-value-anim"
+                 style="animation-delay:0.3s">92.72%</div>
             <div class="metric-delta">✦ EXPLAINABLE</div>
         </div>
         <div class="metric-card">
             <div class="metric-label">GRAPH NODES</div>
-            <div class="metric-value">
-                <span class="counter" data-target="25192" data-suffix="">0</span>
-            </div>
+            <div class="metric-value metric-value-anim"
+                 style="animation-delay:0.5s">25,192</div>
             <div class="metric-delta">✦ CONNECTIONS</div>
         </div>
         <div class="metric-card">
             <div class="metric-label">FEATURES</div>
-            <div class="metric-value">
-                <span class="counter" data-target="41" data-suffix="">0</span>
-            </div>
+            <div class="metric-value metric-value-anim"
+                 style="animation-delay:0.7s">41</div>
             <div class="metric-delta">✦ TRAFFIC FEATURES</div>
         </div>
     </div>
-
-    <script>
-    function animateCounters() {
-        const counters = document.querySelectorAll('.counter');
-        counters.forEach(counter => {
-            const target = parseFloat(counter.getAttribute('data-target'));
-            const suffix = counter.getAttribute('data-suffix');
-            const isDecimal = target % 1 !== 0;
-            const duration = 2000;
-            const steps = 60;
-            const increment = target / steps;
-            let current = 0;
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    current = target;
-                    clearInterval(timer);
-                }
-                counter.textContent = isDecimal
-                    ? current.toFixed(2) + suffix
-                    : Math.floor(current).toLocaleString() + suffix;
-            }, duration / steps);
-        });
-    }
-    setTimeout(animateCounters, 300);
-    </script>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
