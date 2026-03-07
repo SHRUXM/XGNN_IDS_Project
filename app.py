@@ -1370,13 +1370,6 @@ elif page == "◆ MODEL COMPARISON":
             models_data = default_metrics
 ```
 
----
-
-Now the button **always resets** the chart back to your original trained values no matter what the user does to it. 🎯
-
-**Commit message:**
-```
-feat: change regenerate to reset button for radar chart
 
         categories = ['Accuracy', 'Precision',
                       'Recall', 'F1-Score', 'ROC-AUC']
