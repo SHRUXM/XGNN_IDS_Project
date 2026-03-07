@@ -1336,11 +1336,7 @@ elif page == "◆ MODEL COMPARISON":
             'Random Forest': [99.62, 99.79, 99.40, 99.59, 99.99],
             'MLP':           [99.40, 99.36, 99.36, 99.36, 99.88],
         }
-
-        if st.button("🔄 RESET TO TRAINED METRICS",
-                     use_container_width=True):
-            st.success("✔ Chart reset to original trained metrics")
-
+        
         models_data = default_metrics
 
         categories = ['Accuracy', 'Precision', 'Recall', 'F1-score', 'ROC-AUC']
