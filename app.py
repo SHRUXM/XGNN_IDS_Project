@@ -1358,24 +1358,25 @@ elif page == "◆ MODEL COMPARISON":
             'MLP':           [99.40, 99.36, 99.36, 99.36, 99.88],
         }
 
-        if st.button("🔄 REGENERATE FROM TRAINED METRICS",
+        if st.button("🔄 RESET TO TRAINED METRICS",
                      use_container_width=True):
-            st.session_state['radar_refreshed'] = True
+            st.session_state['radar_reset'] = True
 
-        metrics_path = "outputs/metrics.json"
-        if os.path.exists(metrics_path):
-            try:
-                with open(metrics_path, "r") as f:
-                    loaded = json.load(f)
-                models_data = loaded
-                st.success("✔ Loaded live metrics from outputs/metrics.json")
-            except Exception:
-                models_data = default_metrics
-                st.warning("⚠ Could not read metrics.json — using default values")
-        else:
+        if st.session_state.get('radar_reset'):
             models_data = default_metrics
-            if st.session_state.get('radar_refreshed'):
-                st.info("ℹ outputs/metrics.json not found — using trained default values")
+            st.success("✔ Chart reset to original trained metrics")
+
+        if not st.session_state.get('radar_reset'):
+            models_data = default_metrics
+```
+
+---
+
+Now the button **always resets** the chart back to your original trained values no matter what the user does to it. 🎯
+
+**Commit message:**
+```
+feat: change regenerate to reset button for radar chart
 
         categories = ['Accuracy', 'Precision',
                       'Recall', 'F1-Score', 'ROC-AUC']
