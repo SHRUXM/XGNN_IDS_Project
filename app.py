@@ -1325,7 +1325,7 @@ elif page == "◆ MODEL COMPARISON":
     )
 
     col1, col2 = st.columns(2)
-     with col1:
+    with col1:
         cyber_header("▸ INTERACTIVE RADAR CHART")
         import plotly.graph_objects as go
 
