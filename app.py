@@ -546,6 +546,21 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
+    # Real-time clock
+    from datetime import datetime
+    st.markdown(
+        f"""
+        <div style="font-family:'Share Tech Mono',monospace;
+                    font-size:0.72rem;color:rgba(0,255,136,0.5);
+                    letter-spacing:1px;text-align:center;
+                    padding:0.5rem 0;">
+            🕐 {datetime.now().strftime("%d %b %Y  %H:%M:%S")}<br>
+            MUMBAI · IST
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     st.markdown("<br>", unsafe_allow_html=True)
 
     page = st.radio(
@@ -625,25 +640,59 @@ if page == "⬡ HOME":
     <div class="metric-grid">
         <div class="metric-card">
             <div class="metric-label">GCN ACCURACY</div>
-            <div class="metric-value">93.61%</div>
+            <div class="metric-value">
+                <span class="counter" data-target="93.61" data-suffix="%">0%</span>
+            </div>
             <div class="metric-delta">✦ EXPLAINABLE</div>
         </div>
         <div class="metric-card">
             <div class="metric-label">GAT ACCURACY</div>
-            <div class="metric-value">92.72%</div>
+            <div class="metric-value">
+                <span class="counter" data-target="92.72" data-suffix="%">0%</span>
+            </div>
             <div class="metric-delta">✦ EXPLAINABLE</div>
         </div>
         <div class="metric-card">
             <div class="metric-label">GRAPH NODES</div>
-            <div class="metric-value">25,192</div>
+            <div class="metric-value">
+                <span class="counter" data-target="25192" data-suffix="">0</span>
+            </div>
             <div class="metric-delta">✦ CONNECTIONS</div>
         </div>
         <div class="metric-card">
             <div class="metric-label">FEATURES</div>
-            <div class="metric-value">41</div>
+            <div class="metric-value">
+                <span class="counter" data-target="41" data-suffix="">0</span>
+            </div>
             <div class="metric-delta">✦ TRAFFIC FEATURES</div>
         </div>
     </div>
+
+    <script>
+    function animateCounters() {
+        const counters = document.querySelectorAll('.counter');
+        counters.forEach(counter => {
+            const target = parseFloat(counter.getAttribute('data-target'));
+            const suffix = counter.getAttribute('data-suffix');
+            const isDecimal = target % 1 !== 0;
+            const duration = 2000;
+            const steps = 60;
+            const increment = target / steps;
+            let current = 0;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                counter.textContent = isDecimal
+                    ? current.toFixed(2) + suffix
+                    : Math.floor(current).toLocaleString() + suffix;
+            }, duration / steps);
+        });
+    }
+    setTimeout(animateCounters, 300);
+    </script>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
@@ -772,6 +821,54 @@ elif page == "◈ MODEL RESULTS":
     st.markdown("---")
 
     # Results table
+    cyber_header("▸ INTERACTIVE PERFORMANCE CHART")
+    import plotly.graph_objects as go
+
+    models = ['GCN', 'GAT', 'Random Forest', 'MLP']
+    accuracy = [93.61, 92.72, 99.62, 99.40]
+    f1 = [93.02, 91.99, 99.59, 99.36]
+    roc = [98.56, 97.32, 99.99, 99.88]
+
+    fig_bar = go.Figure()
+    fig_bar.add_trace(go.Bar(
+        name='Accuracy', x=models, y=accuracy,
+        marker_color=['#00ff88','#00ff88','#ff6b00','#ff0055'],
+        text=[f'{v}%' for v in accuracy],
+        textposition='outside'
+    ))
+    fig_bar.add_trace(go.Bar(
+        name='F1-Score', x=models, y=f1,
+        marker_color=['rgba(0,255,136,0.5)','rgba(0,255,136,0.5)',
+                      'rgba(255,107,0,0.5)','rgba(255,0,85,0.5)'],
+        text=[f'{v}%' for v in f1],
+        textposition='outside'
+    ))
+    fig_bar.add_trace(go.Bar(
+        name='ROC-AUC', x=models, y=roc,
+        marker_color=['rgba(0,200,255,0.5)','rgba(0,200,255,0.5)',
+                      'rgba(255,204,0,0.5)','rgba(255,107,0,0.5)'],
+        text=[f'{v}%' for v in roc],
+        textposition='outside'
+    ))
+    fig_bar.update_layout(
+        barmode='group',
+        paper_bgcolor='#020b14',
+        plot_bgcolor='#020b14',
+        font=dict(color='#00ff88', family='Share Tech Mono'),
+        legend=dict(bgcolor='rgba(0,0,0,0)',
+                    bordercolor='rgba(0,255,136,0.3)'),
+        xaxis=dict(gridcolor='rgba(0,255,136,0.1)',
+                   tickfont=dict(color='#00ccff')),
+        yaxis=dict(gridcolor='rgba(0,255,136,0.1)',
+                   tickfont=dict(color='#00ccff'),
+                   range=[85, 101]),
+        hoverlabel=dict(bgcolor='#020b14',
+                        bordercolor='#00ff88',
+                        font=dict(color='#00ff88')),
+        margin=dict(t=30, b=10),
+        height=400
+    )
+    st.plotly_chart(fig_bar, use_container_width=True)
     cyber_header("▸ FULL COMPARISON TABLE")
     results_df = pd.DataFrame({
         'MODEL': ['GCN', 'GAT',
@@ -1152,6 +1249,58 @@ elif page == "▶ LIVE PREDICTION":
             </div>
             """, unsafe_allow_html=True)
 
+        # Threat Gauge
+        import plotly.graph_objects as go
+        cyber_header("▸ THREAT LEVEL GAUGE")
+        gauge_value = min(attack_score * 10, 100)
+        gauge_color = (
+            "#ff0055" if attack_score >= 6
+            else "#ff6b00" if attack_score >= 3
+            else "#00ff88"
+        )
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number+delta",
+            value=gauge_value,
+            delta={'reference': 30,
+                   'valueformat': '.0f'},
+            number={'suffix': '%',
+                    'font': {'color': gauge_color,
+                             'family': 'Orbitron',
+                             'size': 36}},
+            gauge={
+                'axis': {'range': [0, 100],
+                         'tickcolor': '#00ff88',
+                         'tickfont': {'color': '#00ccff'}},
+                'bar': {'color': gauge_color},
+                'bgcolor': '#020b14',
+                'bordercolor': 'rgba(0,255,136,0.3)',
+                'steps': [
+                    {'range': [0, 30],
+                     'color': 'rgba(0,255,136,0.1)'},
+                    {'range': [30, 60],
+                     'color': 'rgba(255,107,0,0.1)'},
+                    {'range': [60, 100],
+                     'color': 'rgba(255,0,85,0.1)'}
+                ],
+                'threshold': {
+                    'line': {'color': '#ffffff', 'width': 3},
+                    'thickness': 0.75,
+                    'value': gauge_value
+                }
+            },
+            title={'text': "THREAT LEVEL",
+                   'font': {'color': '#00ff88',
+                            'family': 'Orbitron',
+                            'size': 14}}
+        ))
+        fig_gauge.update_layout(
+            paper_bgcolor='#020b14',
+            font={'color': '#00ff88'},
+            height=300,
+            margin=dict(t=50, b=10, l=30, r=30)
+        )
+        st.plotly_chart(fig_gauge, use_container_width=True)
+
         # Feature risk table
         st.markdown("---")
         cyber_header("▸ FEATURE RISK ANALYSIS")
@@ -1198,14 +1347,65 @@ elif page == "◆ MODEL COMPARISON":
 
     col1, col2 = st.columns(2)
     with col1:
-        cyber_header("▸ RADAR CHART")
-        show_image("outputs/radar_chart.png")
+        cyber_header("▸ INTERACTIVE RADAR CHART")
+        import plotly.graph_objects as go
+        categories = ['Accuracy', 'Precision',
+                      'Recall', 'F1-Score', 'ROC-AUC']
+        fig_radar = go.Figure()
+        models_data = {
+            'GCN':           [93.61, 94.71, 91.40, 93.02, 98.56],
+            'GAT':           [92.72, 94.36, 89.74, 91.99, 97.32],
+            'Random Forest': [99.62, 99.79, 99.40, 99.59, 99.99],
+            'MLP':           [99.40, 99.36, 99.36, 99.36, 99.88],
+        }
+        colors = ['#00ff88', '#b400ff', '#ff6b00', '#ff0055']
+        for (model, values), color in zip(
+            models_data.items(), colors
+        ):
+            fig_radar.add_trace(go.Scatterpolar(
+                r=values + [values[0]],
+                theta=categories + [categories[0]],
+                fill='toself',
+                name=model,
+                line=dict(color=color, width=2),
+                fillcolor=color.replace(
+                    '#', 'rgba('
+                ) + ',0.08)' if '#' in color
+                else color
+            ))
+        fig_radar.update_layout(
+            polar=dict(
+                bgcolor='#020b14',
+                radialaxis=dict(
+                    visible=True, range=[85, 100],
+                    gridcolor='rgba(0,255,136,0.15)',
+                    tickfont=dict(color='#00ccff',
+                                  size=9)
+                ),
+                angularaxis=dict(
+                    gridcolor='rgba(0,255,136,0.15)',
+                    tickfont=dict(color='#00ff88',
+                                  size=10)
+                )
+            ),
+            paper_bgcolor='#020b14',
+            font=dict(color='#00ff88',
+                      family='Share Tech Mono'),
+            legend=dict(
+                bgcolor='rgba(0,0,0,0)',
+                bordercolor='rgba(0,255,136,0.3)',
+                font=dict(size=10)
+            ),
+            margin=dict(t=30, b=30),
+            height=400
+        )
+        st.plotly_chart(fig_radar, use_container_width=True)
         graph_explanation(
-            "The radar chart provides a multi-dimensional comparison of all four models across "
-            "key metrics. While <b style='color:#ff6b00'>Random Forest and MLP</b> show stronger "
-            "raw performance, <b style='color:#00ff88'>GCN and GAT</b> demonstrate a superior "
-            "balance between accuracy and explainability — a critical requirement for real-world "
-            "cybersecurity deployment where every decision must be justified."
+            "The interactive radar chart provides a multi-dimensional comparison of all four models. "
+            "<b style='color:#00ff88'>Hover over any point</b> to see exact values. "
+            "While <b style='color:#ff6b00'>Random Forest and MLP</b> show stronger raw performance, "
+            "<b style='color:#00ff88'>GCN and GAT</b> demonstrate a superior balance between "
+            "accuracy and explainability — critical for real-world cybersecurity deployment."
         )
     with col2:
         cyber_header("▸ METRICS HEATMAP")
@@ -1213,8 +1413,7 @@ elif page == "◆ MODEL COMPARISON":
         graph_explanation(
             "The metrics heatmap offers a colour-coded overview of each model's performance across "
             "all evaluation criteria. <b style='color:#00ff88'>Darker cells indicate stronger "
-            "performance</b>. GCN and GAT show consistently competitive scores across all metrics, "
-            "reinforcing their suitability for production IDS deployment."
+            "performance</b>. GCN and GAT show consistently competitive scores across all metrics."
         )
 
     st.markdown("---")
