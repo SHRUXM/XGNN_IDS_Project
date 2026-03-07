@@ -464,6 +464,19 @@ button[data-testid="collapsedControl"] {
 section[data-testid="stSidebar"] > div:first-child {
     padding-top: 1rem !important;
 }
+
+/* ── GRAPH EXPLANATION BOX ── */
+.graph-explanation {
+    background: rgba(0,255,136,0.03);
+    border-left: 3px solid rgba(0,255,136,0.3);
+    border-radius: 0 6px 6px 0;
+    padding: 0.8rem 1rem;
+    margin: 0.5rem 0 1rem 0;
+    font-family: 'Rajdhani', sans-serif;
+    color: rgba(200,230,255,0.75);
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
 </style>
 
 <!-- Matrix Rain Canvas -->
@@ -560,6 +573,11 @@ def show_image(path, caption=""):
     else:
         st.warning(f"⚠ Image not found: {path}")
 
+def graph_explanation(text):
+    st.markdown(
+        f'<div class="graph-explanation">{text}</div>',
+        unsafe_allow_html=True
+    )
 
 def cyber_header(text):
     st.markdown(
@@ -679,6 +697,14 @@ if page == "⬡ HOME":
     show_image("outputs/network_graph.png",
                "Network traffic as graph — "
                "Red=Attack · Blue=Normal")
+    graph_explanation(
+        "The network traffic graph represents the KDD Cup 1999 dataset as a graph structure where each "
+        "<b style='color:#00ff88'>node represents a network connection</b> and edges connect similar "
+        "traffic flows. <b style='color:#ff0055'>Red nodes</b> indicate attack connections while "
+        "<b style='color:#00ccff'>blue nodes</b> represent normal traffic. This graph construction "
+        "allows GNN models to learn from both individual connection features and the relationships "
+        "between connections — something traditional ML models cannot do."
+    )
 
 
 # ============================================================
@@ -779,17 +805,45 @@ elif page == "◈ MODEL RESULTS":
     with col1:
         cyber_header("▸ GCN TRAINING CURVES")
         show_image("outputs/gcn_training_results.png")
+        graph_explanation(
+            "The GCN training curves show the model's loss decreasing steadily over epochs, "
+            "indicating stable convergence without overfitting. The validation accuracy reaches "
+            "<b style='color:#00ff88'>93.61%</b>, confirming the model generalizes well to unseen "
+            "network traffic. The close alignment between training and validation curves demonstrates "
+            "that the GCN has learned robust and transferable features from the graph-structured data."
+        )
     with col2:
         cyber_header("▸ GAT TRAINING CURVES")
         show_image("outputs/gat_training_results.png")
+        graph_explanation(
+            "The GAT training curves demonstrate the attention mechanism successfully learning to "
+            "focus on the most relevant graph connections over time. The final validation accuracy "
+            "of <b style='color:#00ff88'>92.72%</b> confirms the model effectively distinguishes "
+            "attack traffic from normal connections. The attention-based learning allows GAT to "
+            "dynamically weight the importance of neighbouring nodes during each training iteration."
+        )
 
     st.markdown("---")
     cyber_header("▸ CONFUSION MATRICES")
     show_image("outputs/confusion_matrices.png")
+    graph_explanation(
+        "The confusion matrices reveal that both GCN and GAT achieve high true positive rates for "
+        "attack detection with minimal false negatives — the most critical metric in intrusion detection. "
+        "A <b style='color:#00ff88'>low false negative rate</b> means fewer real attacks go undetected, "
+        "which is essential for a reliable security system. False positives are also kept low, "
+        "reducing alert fatigue for security analysts in real-world deployments."
+    )
 
     st.markdown("---")
     cyber_header("▸ ROC CURVES")
     show_image("outputs/roc_curves.png")
+    graph_explanation(
+        "The ROC curves illustrate the trade-off between true positive rate and false positive rate "
+        "at various classification thresholds. GCN achieves an AUC of <b style='color:#00ff88'>0.9856</b> "
+        "and GAT achieves <b style='color:#00ff88'>0.9732</b>, both indicating excellent discrimination "
+        "ability between normal and attack traffic. An AUC value close to 1.0 confirms the models are "
+        "highly reliable classifiers across all possible decision thresholds."
+    )
 
 
 # ============================================================
@@ -825,6 +879,14 @@ elif page == "◉ EXPLAINABILITY":
             unsafe_allow_html=True
         )
         show_image("outputs/gcn_feature_importance.png")
+        graph_explanation(
+            "The GCN feature importance chart highlights <b style='color:#00ff88'>wrong_fragment</b> "
+            "as the most critical feature, followed by connection-level statistics such as "
+            "<b style='color:#00ccff'>src_bytes</b> and <b style='color:#00ccff'>dst_bytes</b>. "
+            "These features represent abnormal packet fragmentation patterns commonly associated "
+            "with DoS and probe attacks. This ranking provides security analysts with a clear, "
+            "interpretable explanation of which network behaviours triggered the intrusion alert."
+        )
     with col2:
         st.markdown(
             '<div style="font-family:\'Share Tech Mono\','
@@ -834,7 +896,14 @@ elif page == "◉ EXPLAINABILITY":
             unsafe_allow_html=True
         )
         show_image("outputs/gat_feature_importance.png")
-
+        graph_explanation(
+            "The GAT feature importance confirms <b style='color:#b400ff'>wrong_fragment</b> as the "
+            "dominant indicator, consistent with the GCN findings. This agreement between two "
+            "independent GNN architectures <b style='color:#00ff88'>validates the reliability</b> of "
+            "the explainability analysis and strengthens the research findings. The GAT's attention "
+            "mechanism reveals not just which features matter, but which neighbouring connections "
+            "amplify the attack signal."
+        )
     st.success(
         "🔑 KEY FINDING: `wrong_fragment` is the #1 "
         "feature in BOTH models — a classic network "
@@ -845,6 +914,14 @@ elif page == "◉ EXPLAINABILITY":
     cyber_header("▸ ATTACK SUBGRAPH EXPLANATION")
     show_image("outputs/gcn_subgraph_node_2.png",
                "Yellow=Target · Red=Attack · Blue=Normal")
+    graph_explanation(
+        "The subgraph explanation visualizes the local neighbourhood of a flagged attack node "
+        "(<b style='color:#ffcc00'>yellow</b>). <b style='color:#ff0055'>Red nodes</b> represent "
+        "neighbouring attack connections that influenced the classification decision, while "
+        "<b style='color:#00ccff'>blue nodes</b> are normal connections. This graph-level explanation "
+        "shows exactly <b style='color:#00ff88'>WHY the GCN flagged this connection</b> — by revealing "
+        "the surrounding attack context. This is a key advantage over black-box models like Random Forest."
+    )
 
     st.markdown("---")
     cyber_header("▸ GAT ATTENTION WEIGHTS")
@@ -852,16 +929,42 @@ elif page == "◉ EXPLAINABILITY":
     col1, col2 = st.columns(2)
     with col1:
         show_image("outputs/gat_attention_weights.png")
+        graph_explanation(
+            "GAT attention weights reveal which neighbouring nodes the model focused on during "
+            "classification. <b style='color:#00ff88'>Higher attention scores</b> indicate stronger "
+            "influence on the final prediction. Attack nodes consistently receive higher attention "
+            "weights, confirming the model has learned meaningful and discriminative patterns in "
+            "attack traffic rather than random noise."
+        )
     with col2:
         show_image("outputs/attention_per_head.png")
+        graph_explanation(
+            "Multi-head attention allows the GAT to capture different aspects of the graph structure "
+            "simultaneously. Each attention head learns a <b style='color:#b400ff'>different "
+            "representation</b> of the network topology — some heads focus on traffic volume features "
+            "while others focus on error rates or protocol types. Together they improve the model's "
+            "ability to detect complex and varied attack patterns."
+        )
 
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
         show_image("outputs/top_attended_nodes.png")
+        graph_explanation(
+            "The top attended nodes represent the most <b style='color:#00ff88'>influential "
+            "connections</b> in the network graph. These nodes act as key indicators for the model's "
+            "decision-making process, providing security analysts with specific connections to "
+            "investigate during an intrusion event. This ranked list directly supports "
+            "forensic investigation workflows."
+        )
     with col2:
-        show_image(
-            "outputs/attack_vs_normal_attention.png"
+        show_image("outputs/attack_vs_normal_attention.png")
+        graph_explanation(
+            "This comparison clearly shows that attack traffic receives "
+            "<b style='color:#ff0055'>significantly higher attention weights</b> than normal traffic. "
+            "The clear separation between the two distributions confirms that the GAT has successfully "
+            "learned to distinguish malicious from benign network behaviour — providing both high "
+            "accuracy and transparent, human-interpretable reasoning."
         )
 
 
@@ -1097,9 +1200,22 @@ elif page == "◆ MODEL COMPARISON":
     with col1:
         cyber_header("▸ RADAR CHART")
         show_image("outputs/radar_chart.png")
+        graph_explanation(
+            "The radar chart provides a multi-dimensional comparison of all four models across "
+            "key metrics. While <b style='color:#ff6b00'>Random Forest and MLP</b> show stronger "
+            "raw performance, <b style='color:#00ff88'>GCN and GAT</b> demonstrate a superior "
+            "balance between accuracy and explainability — a critical requirement for real-world "
+            "cybersecurity deployment where every decision must be justified."
+        )
     with col2:
         cyber_header("▸ METRICS HEATMAP")
         show_image("outputs/metrics_heatmap.png")
+        graph_explanation(
+            "The metrics heatmap offers a colour-coded overview of each model's performance across "
+            "all evaluation criteria. <b style='color:#00ff88'>Darker cells indicate stronger "
+            "performance</b>. GCN and GAT show consistently competitive scores across all metrics, "
+            "reinforcing their suitability for production IDS deployment."
+        )
 
     st.markdown("---")
     cyber_header("▸ ACCURACY vs EXPLAINABILITY")
@@ -1107,10 +1223,24 @@ elif page == "◆ MODEL COMPARISON":
                "Key research argument — "
                "XGNN achieves high explainability "
                "with competitive accuracy")
+    graph_explanation(
+        "This chart represents the <b style='color:#00ff88'>core argument of this research</b>. "
+        "Traditional models like Random Forest sacrifice explainability for accuracy. XGNN models achieve "
+        "<b style='color:#00ff88'>competitive accuracy (~93%)</b> while providing "
+        "<b style='color:#b400ff'>full explainability</b> — making them the superior choice for "
+        "cybersecurity applications where analysts must understand and justify every alert."
+    )
 
     st.markdown("---")
     cyber_header("▸ FULL MODEL COMPARISON")
     show_image("outputs/model_comparison.png")
+    graph_explanation(
+        "The full model comparison confirms that XGNN models strike the "
+        "<b style='color:#00ff88'>optimal balance between performance and interpretability</b>. "
+        "For a network intrusion detection system deployed in real environments, explainability "
+        "is not optional — security teams require clear reasoning behind every flagged connection "
+        "to take appropriate and legally justified action."
+    )
 
     st.markdown("---")
 
