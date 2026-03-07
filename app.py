@@ -1368,9 +1368,7 @@ elif page == "◆ MODEL COMPARISON":
 
         if not st.session_state.get('radar_reset'):
             models_data = default_metrics
-```
-
-
+            
         categories = ['Accuracy', 'Precision',
                       'Recall', 'F1-Score', 'ROC-AUC']
         fig_radar = go.Figure()
