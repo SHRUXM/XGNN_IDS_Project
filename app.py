@@ -1359,8 +1359,14 @@ elif page == "◆ MODEL COMPARISON":
             'MLP':           [99.40, 99.36, 99.36, 99.36, 99.88],
         }
         colors = ['#00ff88', '#b400ff', '#ff6b00', '#ff0055']
-        for (model, values), color in zip(
-            models_data.items(), colors
+        fill_colors = [
+            'rgba(0,255,136,0.08)',
+            'rgba(180,0,255,0.08)',
+            'rgba(255,107,0,0.08)',
+            'rgba(255,0,85,0.08)'
+        ]
+        for (model, values), color, fill in zip(
+            models_data.items(), colors, fill_colors
         ):
             fig_radar.add_trace(go.Scatterpolar(
                 r=values + [values[0]],
@@ -1368,10 +1374,8 @@ elif page == "◆ MODEL COMPARISON":
                 fill='toself',
                 name=model,
                 line=dict(color=color, width=2),
-                fillcolor=color.replace(
-                    '#', 'rgba('
-                ) + ',0.08)' if '#' in color
-                else color
+                fillcolor=fill
+            ))
             ))
         fig_radar.update_layout(
             polar=dict(
