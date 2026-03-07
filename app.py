@@ -1376,7 +1376,6 @@ elif page == "◆ MODEL COMPARISON":
                 line=dict(color=color, width=2),
                 fillcolor=fill
             ))
-            ))
         fig_radar.update_layout(
             polar=dict(
                 bgcolor='#020b14',
