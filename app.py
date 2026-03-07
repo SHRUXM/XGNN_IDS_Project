@@ -1364,7 +1364,7 @@ elif page == "◆ MODEL COMPARISON":
 
         models_data = default_metrics
 
-        categories = ['Accuracy', 'Precision',
+        categories = ['Accuracy', 'Precision', 'Recall', 'F1-score', 'ROC-AUC]
         fig_radar = go.Figure()
         colors = ['#00ff88', '#b400ff', '#ff6b00', '#ff0055']
         fill_colors = [
