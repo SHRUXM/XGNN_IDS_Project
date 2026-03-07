@@ -1325,10 +1325,9 @@ elif page == "◆ MODEL COMPARISON":
     )
 
     col1, col2 = st.columns(2)
-    with col1:
+     with col1:
         cyber_header("▸ INTERACTIVE RADAR CHART")
         import plotly.graph_objects as go
-        import json
 
         default_metrics = {
             'GCN':           [93.61, 94.71, 91.40, 93.02, 98.56],
@@ -1336,10 +1335,9 @@ elif page == "◆ MODEL COMPARISON":
             'Random Forest': [99.62, 99.79, 99.40, 99.59, 99.99],
             'MLP':           [99.40, 99.36, 99.36, 99.36, 99.88],
         }
-        
-        models_data = default_metrics
 
-        categories = ['Accuracy', 'Precision', 'Recall', 'F1-score', 'ROC-AUC']
+        models_data = default_metrics
+        categories = ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC']
         fig_radar = go.Figure()
         colors = ['#00ff88', '#b400ff', '#ff6b00', '#ff0055']
         fill_colors = [
@@ -1359,24 +1357,21 @@ elif page == "◆ MODEL COMPARISON":
                 line=dict(color=color, width=2),
                 fillcolor=fill
             ))
-         fig_radar.update_layout(
+        fig_radar.update_layout(
             polar=dict(
                 bgcolor='#020b14',
                 radialaxis=dict(
                     visible=True,
                     autorange=True,
-                    tickfont=dict(color='#00ccff',
-                                  size=9)
+                    tickfont=dict(color='#00ccff', size=9)
                 ),
                 angularaxis=dict(
                     gridcolor='rgba(0,255,136,0.15)',
-                    tickfont=dict(color='#00ff88',
-                                  size=10)
+                    tickfont=dict(color='#00ff88', size=10)
                 )
             ),
             paper_bgcolor='#020b14',
-            font=dict(color='#00ff88',
-                      family='Share Tech Mono'),
+            font=dict(color='#00ff88', family='Share Tech Mono'),
             legend=dict(
                 bgcolor='rgba(0,0,0,0)',
                 bordercolor='rgba(0,255,136,0.3)',
