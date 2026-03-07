@@ -37,7 +37,7 @@ st.markdown("""
 
 /* ── MATRIX BACKGROUND ── */
 .stApp {
-    background-color: #0a0f0a !important;
+    background-color: #020b14 !important;
     background-image:
         radial-gradient(ellipse at 20% 50%,
             rgba(0,255,136,0.04) 0%, transparent 60%),
@@ -52,7 +52,7 @@ st.markdown("""
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #020b14; }
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(#2ecc71, #b400ff);
+    background: linear-gradient(#00ff88, #b400ff);
     border-radius: 2px;
 }
 
@@ -68,7 +68,7 @@ section[data-testid="stSidebar"] {
 
 section[data-testid="stSidebar"] * {
     font-family: 'Share Tech Mono', monospace !important;
-    color: #2ecc71 !important;
+    color: #00ff88 !important;
 }
 
 section[data-testid="stSidebar"] .stRadio label {
@@ -81,7 +81,7 @@ section[data-testid="stSidebar"] .stRadio label {
 
 section[data-testid="stSidebar"] .stRadio label:hover {
     color: #ffffff !important;
-    text-shadow: 0 0 10px #2ecc71 !important;
+    text-shadow: 0 0 10px #00ff88 !important;
 }
 
 /* ── MAIN HEADER ── */
@@ -97,10 +97,10 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     font-weight: 900 !important;
     background: linear-gradient(
         135deg,
-        #2ecc71 0%,
+        #00ff88 0%,
         #00ccff 40%,
         #b400ff 80%,
-        #2ecc71 100%
+        #00ff88 100%
     );
     background-size: 200% auto;
     -webkit-background-clip: text !important;
@@ -190,7 +190,7 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     top: 0; left: -100%;
     width: 100%; height: 2px;
     background: linear-gradient(90deg,
-        transparent, #2ecc71, transparent);
+        transparent, #00ff88, transparent);
     animation: scan-line 3s linear infinite;
 }
 
@@ -214,7 +214,7 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     font-family: 'Orbitron', monospace !important;
     font-size: 2rem !important;
     font-weight: 700 !important;
-    color: #2ecc71 !important;
+    color: #00ff88 !important;
     text-shadow: 0 0 15px rgba(0,255,136,0.5);
     margin: 0.3rem 0;
 }
@@ -238,11 +238,11 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     font-family: 'Orbitron', monospace !important;
     font-size: 1.1rem !important;
     font-weight: 700 !important;
-    color: #2ecc71 !important;
+    color: #00ff88 !important;
     text-transform: uppercase !important;
     letter-spacing: 3px !important;
     padding: 0.7rem 1rem !important;
-    border-left: 3px solid #2ecc71 !important;
+    border-left: 3px solid #00ff88 !important;
     background: rgba(0,255,136,0.04) !important;
     margin: 1.5rem 0 1rem 0 !important;
     text-shadow: 0 0 10px rgba(0,255,136,0.4);
@@ -284,7 +284,7 @@ section[data-testid="stSidebar"] .stRadio label:hover {
 }
 
 .progress-gcn {
-    background: linear-gradient(90deg, #2ecc71, #00ccff);
+    background: linear-gradient(90deg, #00ff88, #00ccff);
     box-shadow: 0 0 8px rgba(0,255,136,0.4);
 }
 .progress-gat {
@@ -308,7 +308,7 @@ section[data-testid="stSidebar"] .stRadio label:hover {
 
 .stDataFrame th {
     background: rgba(0,255,136,0.1) !important;
-    color: #2ecc71 !important;
+    color: #00ff88 !important;
     font-family: 'Share Tech Mono', monospace !important;
     letter-spacing: 1px !important;
 }
@@ -329,8 +329,8 @@ section[data-testid="stSidebar"] .stRadio label:hover {
 .stButton button {
     background: linear-gradient(135deg,
         rgba(0,255,136,0.1), rgba(0,200,255,0.1)) !important;
-    border: 1px solid #2ecc71 !important;
-    color: #2ecc71 !important;
+    border: 1px solid #00ff88 !important;
+    color: #00ff88 !important;
     font-family: 'Orbitron', monospace !important;
     font-size: 0.85rem !important;
     letter-spacing: 2px !important;
@@ -372,7 +372,7 @@ section[data-testid="stSidebar"] .stRadio label:hover {
 
 /* ── SLIDERS ── */
 .stSlider .stSlider > div {
-    color: #2ecc71 !important;
+    color: #00ff88 !important;
 }
 
 /* ── DIVIDER ── */
@@ -402,7 +402,7 @@ hr {
     font-family: 'Orbitron', monospace;
     font-size: 1.3rem;
     font-weight: 900;
-    color: #2ecc71;
+    color: #00ff88;
     text-shadow: 0 0 15px rgba(0,255,136,0.5);
     letter-spacing: 3px;
 }
@@ -436,15 +436,15 @@ hr {
     gap: 6px;
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.75rem;
-    color: #2ecc71;
+    color: #00ff88;
     letter-spacing: 2px;
 }
 
 .status-dot {
     width: 8px; height: 8px;
-    background: #2ecc71;
+    background: #00ff88;
     border-radius: 50%;
-    box-shadow: 0 0 6px #2ecc71;
+    box-shadow: 0 0 6px #00ff88;
     animation: pulse-dot 1.5s ease infinite;
 }
 
@@ -480,7 +480,7 @@ const drops = Array(cols).fill(1);
 function drawMatrix() {
     ctx.fillStyle = 'rgba(2,11,20,0.05)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#2ecc71';
+    ctx.fillStyle = '#00ff88';
     ctx.font = fontSize + 'px monospace';
     drops.forEach((y, i) => {
         const char = chars[Math.floor(Math.random()*chars.length)];
@@ -638,7 +638,7 @@ if page == "⬡ HOME":
         <div style="font-family:'Rajdhani',sans-serif;
                     color:rgba(200,230,255,0.85);
                     line-height:1.8; font-size:1rem;">
-        This project proposes an <b style="color:#2ecc71">
+        This project proposes an <b style="color:#00ff88">
         Explainable Graph Neural Network (XGNN)</b> based
         <b style="color:#00ccff">Network Intrusion Detection
         System</b> that detects cyberattacks with high accuracy
@@ -648,7 +648,7 @@ if page == "⬡ HOME":
         Traditional ML models function as <b style="color:
         #ff6b00">black boxes</b> — they cannot explain WHY a
         connection is flagged. In cybersecurity,
-        <b style="color:#2ecc71">explainability is as critical
+        <b style="color:#00ff88">explainability is as critical
         as accuracy.</b>
         </div>
         """, unsafe_allow_html=True)
@@ -819,7 +819,7 @@ elif page == "◉ EXPLAINABILITY":
     with col1:
         st.markdown(
             '<div style="font-family:\'Share Tech Mono\','
-            'monospace;color:#2ecc71;font-size:0.75rem;'
+            'monospace;color:#00ff88;font-size:0.75rem;'
             'letter-spacing:2px;margin:0.5rem 0;">'
             '── GCN FEATURES ──</div>',
             unsafe_allow_html=True
@@ -1033,9 +1033,9 @@ elif page == "▶ LIVE PREDICTION":
                         border-radius:8px;padding:1.5rem;
                         margin:1rem 0;
                         font-family:'Orbitron',monospace;">
-                <div style="color:#2ecc71;font-size:1.4rem;
+                <div style="color:#00ff88;font-size:1.4rem;
                             font-weight:700;
-                            text-shadow:0 0 15px #2ecc71;
+                            text-shadow:0 0 15px #00ff88;
                             letter-spacing:3px;">
                     ✅ NORMAL TRAFFIC
                 </div>
@@ -1509,7 +1509,7 @@ elif page == "📂 CUSTOM DATASET":
                     )
                     ax.set_yticklabels(
                         top_features[::-1],
-                        color='#2ecc71', fontsize=9
+                        color='#00ff88', fontsize=9
                     )
                     ax.set_xlabel(
                         'Importance Score',
@@ -1517,16 +1517,16 @@ elif page == "📂 CUSTOM DATASET":
                     )
                     ax.set_title(
                         f'Top {top_n} Important Features',
-                        color='#2ecc71',
+                        color='#00ff88',
                         fontsize=13,
                         fontweight='bold'
                     )
                     ax.tick_params(colors='#00ccff')
                     for spine in ax.spines.values():
-                        spine.set_edgecolor('#2ecc71')
+                        spine.set_edgecolor('#00ff88')
                     ax.grid(
                         True, alpha=0.1,
-                        color='#2ecc71', axis='x'
+                        color='#00ff88', axis='x'
                     )
                     plt.tight_layout()
                     st.pyplot(fig)
@@ -1571,7 +1571,7 @@ elif page == "📂 CUSTOM DATASET":
                     node_colors = [
                         '#ff0055'
                         if pred_labels[n] == 'ATTACK'
-                        else '#2ecc71'
+                        else '#00ff88'
                         for n in G_up.nodes()
                     ]
                     nx.draw_networkx_nodes(
@@ -1589,7 +1589,7 @@ elif page == "📂 CUSTOM DATASET":
                     ax2.set_title(
                         'Network Traffic Graph — '
                         'Red=Attack · Green=Normal',
-                        color='#2ecc71',
+                        color='#00ff88',
                         fontsize=12,
                         fontweight='bold'
                     )
@@ -1646,7 +1646,7 @@ elif page == "📂 CUSTOM DATASET":
                     padding:3rem;text-align:center;
                     margin:2rem 0;">
             <div style="font-family:'Orbitron',monospace;
-                        font-size:1.5rem;color:#2ecc71;
+                        font-size:1.5rem;color:#00ff88;
                         text-shadow:0 0 15px
                         rgba(0,255,136,0.4);
                         margin-bottom:1.5rem;">
@@ -1660,10 +1660,10 @@ elif page == "📂 CUSTOM DATASET":
                 JUST UPLOAD — NO SETUP NEEDED<br>
                 THE SYSTEM DOES EVERYTHING AUTOMATICALLY<br>
                 ────────────────────────────<br>
-                ► KDD CUP 1999 &nbsp;⭐ TRAINED &nbsp;<a href="https://raw.githubusercontent.com/PacktWorkshops/The-Data-Science-Workshop/master/Chapter09/Dataset/KDDCup99.csv" target="_blank" style="color:#2ecc71;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
-                ► NSL-KDD &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅ &nbsp;<a href="https://raw.githubusercontent.com/defcom17/NSL_KDD/master/KDDTest%2B.csv" target="_blank" style="color:#2ecc71;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
-                ► CIC-IDS-2017 &nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/chethuhn/network-intrusion-dataset" target="_blank" style="color:#2ecc71;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
-                ► UNSW-NB15 &nbsp;&nbsp;&nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/mrwellsdavid/unsw-nb15" target="_blank" style="color:#2ecc71;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
+                ► KDD CUP 1999 &nbsp;⭐ TRAINED &nbsp;<a href="https://raw.githubusercontent.com/PacktWorkshops/The-Data-Science-Workshop/master/Chapter09/Dataset/KDDCup99.csv" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
+                ► NSL-KDD &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅ &nbsp;<a href="https://raw.githubusercontent.com/defcom17/NSL_KDD/master/KDDTest%2B.csv" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
+                ► CIC-IDS-2017 &nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/chethuhn/network-intrusion-dataset" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
+                ► UNSW-NB15 &nbsp;&nbsp;&nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/mrwellsdavid/unsw-nb15" target="_blank" style="color:#00ff88;text-decoration:none;border-bottom:1px solid rgba(0,255,136,0.4);">⬇ DOWNLOAD</a><br>
                 ► ANY NETWORK CSV ✅
             </div>
         </div>
