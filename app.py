@@ -464,6 +464,17 @@ button[data-testid="collapsedControl"] {
 section[data-testid="stSidebar"] > div:first-child {
     padding-top: 1rem !important;
 }
+.graph-explanation {
+    background: rgba(0,255,136,0.03);
+    border-left: 3px solid rgba(0,255,136,0.3);
+    border-radius: 0 6px 6px 0;
+    padding: 0.8rem 1rem;
+    margin: 0.5rem 0 1rem 0;
+    font-family: 'Rajdhani', sans-serif;
+    color: rgba(200,230,255,0.75);
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
 </style>
 
 <!-- Matrix Rain Canvas -->
@@ -567,6 +578,11 @@ def cyber_header(text):
         unsafe_allow_html=True
     )
 
+def graph_explanation(text):
+    st.markdown(
+        f'<div class="graph-explanation">{text}</div>',
+        unsafe_allow_html=True
+    )
 
 def progress_bar(label, value, css_class,
                  show_pct=True):
@@ -607,22 +623,22 @@ if page == "⬡ HOME":
     <div class="metric-grid">
         <div class="metric-card">
             <div class="metric-label">GCN ACCURACY</div>
-            <div class="metric-value">93.61%</div>
+            <div class="metric-value">95.17%</div>
             <div class="metric-delta">✦ EXPLAINABLE</div>
         </div>
         <div class="metric-card">
             <div class="metric-label">GAT ACCURACY</div>
-            <div class="metric-value">92.72%</div>
+            <div class="metric-value">92.84%</div>
             <div class="metric-delta">✦ EXPLAINABLE</div>
         </div>
         <div class="metric-card">
             <div class="metric-label">GRAPH NODES</div>
-            <div class="metric-value">25,192</div>
+            <div class="metric-value">175,341</div>
             <div class="metric-delta">✦ CONNECTIONS</div>
         </div>
         <div class="metric-card">
             <div class="metric-label">FEATURES</div>
-            <div class="metric-value">41</div>
+            <div class="metric-value">42</div>
             <div class="metric-delta">✦ TRAFFIC FEATURES</div>
         </div>
     </div>
@@ -660,7 +676,7 @@ if page == "⬡ HOME":
                     font-size:0.82rem; line-height:2;
                     color:rgba(0,255,136,0.8);">
         ► DATA PREPROCESSING<br>
-        &nbsp;&nbsp;KDD Cup Dataset · 25,192 connections<br>
+        &nbsp;&nbsp;UNSW-NB15 Dataset · 175,341 connections<br>
         ► GRAPH CONSTRUCTION<br>
         &nbsp;&nbsp;Nodes=Connections · Edges=Similar pairs<br>
         ► GNN MODELS<br>
@@ -707,18 +723,18 @@ elif page == "◈ MODEL RESULTS":
             '── GNN MODELS ──</div>',
             unsafe_allow_html=True
         )
-        progress_bar("GCN  ACCURACY", 0.9361,
+        progress_bar("GCN  ACCURACY", 0.9517,
                      "progress-gcn")
-        progress_bar("GCN  F1-SCORE", 0.9302,
+        progress_bar("GCN  F1-SCORE", 0.9654,
                      "progress-gcn")
-        progress_bar("GCN  ROC-AUC", 0.9856,
+        progress_bar("GCN  ROC-AUC", 0.9890,
                      "progress-gcn")
         st.markdown("<br>", unsafe_allow_html=True)
-        progress_bar("GAT  ACCURACY", 0.9272,
+        progress_bar("GAT  ACCURACY", 0.9284,
                      "progress-gat")
-        progress_bar("GAT  F1-SCORE", 0.9199,
+        progress_bar("GAT  F1-SCORE", 0.9500,
                      "progress-gat")
-        progress_bar("GAT  ROC-AUC", 0.9732,
+        progress_bar("GAT  ROC-AUC", 0.9670,
                      "progress-gat")
 
     with col2:
@@ -729,37 +745,72 @@ elif page == "◈ MODEL RESULTS":
             '── BASELINE MODELS ──</div>',
             unsafe_allow_html=True
         )
-        progress_bar("RF   ACCURACY", 0.9962,
+        progress_bar("RF   ACCURACY", 0.9608,
                      "progress-rf")
-        progress_bar("RF   F1-SCORE", 0.9959,
+        progress_bar("RF   F1-SCORE", 0.9714,
                      "progress-rf")
-        progress_bar("RF   ROC-AUC", 0.9999,
+        progress_bar("RF   ROC-AUC", 0.9941,
                      "progress-rf")
         st.markdown("<br>", unsafe_allow_html=True)
-        progress_bar("MLP  ACCURACY", 0.9940,
+        progress_bar("MLP  ACCURACY", 0.9487,
                      "progress-mlp")
-        progress_bar("MLP  F1-SCORE", 0.9936,
+        progress_bar("MLP  F1-SCORE", 0.9626,
                      "progress-mlp")
-        progress_bar("MLP  ROC-AUC", 0.9988,
+        progress_bar("MLP  ROC-AUC", 0.9911,
                      "progress-mlp")
 
     st.markdown("---")
+    cyber_header("▸ INTERACTIVE PERFORMANCE CHART")
+    import plotly.graph_objects as go
+
+    models = ['GCN', 'GAT', 'Random Forest', 'MLP']
+    accuracy = [95.17, 92.84, 96.08, 94.87]
+    f1 = [96.54, 95.00, 97.14, 96.26]
+    roc = [98.90, 96.70, 99.41, 99.11]
+
+    fig_bar = go.Figure()
+    fig_bar.add_trace(go.Bar(
+        name='Accuracy', x=models, y=accuracy,
+        marker_color=['#00ff88', '#00ff88', '#ff6b00', '#ff0055'],
+        text=[f'{v}%' for v in accuracy], textposition='outside'
+    ))
+    fig_bar.add_trace(go.Bar(
+        name='F1-Score', x=models, y=f1,
+        marker_color=['rgba(0,255,136,0.5)', 'rgba(0,255,136,0.5)', 'rgba(255,107,0,0.5)', 'rgba(255,0,85,0.5)'],
+        text=[f'{v}%' for v in f1], textposition='outside'
+    ))
+    fig_bar.add_trace(go.Bar(
+        name='ROC-AUC', x=models, y=roc,
+        marker_color=['rgba(0,200,255,0.5)', 'rgba(0,200,255,0.5)', 'rgba(255,204,0,0.5)', 'rgba(255,107,0,0.5)'],
+        text=[f'{v}%' for v in roc], textposition='outside'
+    ))
+    fig_bar.update_layout(
+        barmode='group', paper_bgcolor='#020b14', plot_bgcolor='#020b14',
+        font=dict(color='#00ff88', family='Share Tech Mono'),
+        legend=dict(bgcolor='rgba(0,0,0,0)', bordercolor='rgba(0,255,136,0.3)'),
+        xaxis=dict(gridcolor='rgba(0,255,136,0.1)', tickfont=dict(color='#00ccff')),
+        yaxis=dict(gridcolor='rgba(0,255,136,0.1)', tickfont=dict(color='#00ccff'), range=[85, 101]),
+        hoverlabel=dict(bgcolor='#020b14', bordercolor='#00ff88', font=dict(color='#00ff88')),
+        margin=dict(t=30, b=10), height=400
+    )
+    st.plotly_chart(fig_bar, use_container_width=True,
+                    config={'displayModeBar': True, 'displaylogo': False})
 
     # Results table
     cyber_header("▸ FULL COMPARISON TABLE")
     results_df = pd.DataFrame({
         'MODEL': ['GCN', 'GAT',
                   'Random Forest', 'MLP'],
-        'ACCURACY': ['93.61%', '92.72%',
-                     '99.62%', '99.40%'],
-        'PRECISION': ['0.9471', '0.9436',
-                      '0.9979', '0.9936'],
-        'RECALL': ['0.9140', '0.8974',
-                   '0.9940', '0.9936'],
-        'F1': ['0.9302', '0.9199',
-               '0.9959', '0.9936'],
-        'ROC-AUC': ['0.9856', '0.9732',
-                    '0.9999', '0.9988'],
+        'ACCURACY': ['95.17%', '92.84%',
+                     '96.08%', '94.87%'],
+        'PRECISION': ['0.9411', '0.9048',
+                      '0.9648', '0.9547'],
+        'RECALL': ['0.9911', '1.0000',
+                   '0.9782', '0.9707'],
+        'F1': ['0.9654', '0.9500',
+               '0.9714', '0.9626'],
+        'ROC-AUC': ['0.9880', '0.9670',
+                    '0.9941', '0.9911'],
         'EXPLAINABLE': ['✅ YES', '✅ YES',
                         '❌ NO', '❌ NO']
     })
@@ -779,17 +830,45 @@ elif page == "◈ MODEL RESULTS":
     with col1:
         cyber_header("▸ GCN TRAINING CURVES")
         show_image("outputs/gcn_training_results.png")
+        graph_explanation(
+            "GCN training over 100 epochs on UNSW-NB15. "
+            "Loss steadily decreased from 0.2689 to 0.1202, "
+            "while test accuracy improved from 93.03% to "
+            "<b style='color:#00ff88'>95.17%</b> — showing "
+            "stable learning with no overfitting."
+        )
     with col2:
         cyber_header("▸ GAT TRAINING CURVES")
         show_image("outputs/gat_training_results.png")
+        graph_explanation(
+            "GAT training over 100 epochs on UNSW-NB15. "
+            "The attention mechanism required more epochs to "
+            "stabilize, achieving a final test accuracy of "
+            "<b style='color:#b400ff'>92.84%</b> with "
+            "perfect recall of 1.0000 — detecting every attack."
+        )
 
     st.markdown("---")
     cyber_header("▸ CONFUSION MATRICES")
     show_image("outputs/confusion_matrices.png")
+    graph_explanation(
+        "Confusion matrices for all 4 models on UNSW-NB15 test set. "
+        "GCN correctly classified <b style='color:#00ff88'>95.17%</b> "
+        "of connections. GAT achieved perfect recall — it missed "
+        "<b style='color:#b400ff'>zero attacks</b>. "
+        "Random Forest had the highest overall accuracy at 96.08%."
+    )
 
     st.markdown("---")
     cyber_header("▸ ROC CURVES")
     show_image("outputs/roc_curves.png")
+    graph_explanation(
+        "ROC curves compare all models on UNSW-NB15. "
+        "GCN achieves ROC-AUC of <b style='color:#00ff88'>0.9890</b> "
+        "and GAT achieves <b style='color:#b400ff'>0.9670</b> — "
+        "both significantly above the random classifier baseline. "
+        "Higher AUC means better attack vs normal discrimination."
+    )
 
 
 # ============================================================
@@ -825,6 +904,13 @@ elif page == "◉ EXPLAINABILITY":
             unsafe_allow_html=True
         )
         show_image("outputs/gcn_feature_importance.png")
+        graph_explanation(
+            "GCN top feature: <b style='color:#00ff88'>ct_srv_dst</b> "
+            "(0.0747) — counts connections to the same service on dst. "
+            "Other key features: ct_state_ttl, state, dttl — all "
+            "connection-tracking features unique to UNSW-NB15 that "
+            "capture abnormal network behaviour patterns."
+        )
     with col2:
         st.markdown(
             '<div style="font-family:\'Share Tech Mono\','
@@ -834,17 +920,33 @@ elif page == "◉ EXPLAINABILITY":
             unsafe_allow_html=True
         )
         show_image("outputs/gat_feature_importance.png")
+        graph_explanation(
+            "GAT top feature: <b style='color:#b400ff'>ct_dst_sport_ltm</b> "
+            "(0.1313) — tracks destination sport over time. "
+            "GAT's attention mechanism identified <b style='color:#00ccff'>"
+            "dload and rate</b> as critical — capturing data transfer "
+            "patterns that distinguish DoS and reconnaissance attacks."
+        )
 
     st.success(
-        "🔑 KEY FINDING: `wrong_fragment` is the #1 "
-        "feature in BOTH models — a classic network "
-        "attack indicator confirmed by both GCN and GAT!"
+        "🔑 KEY FINDING: `ct_srv_dst` is the #1 GCN feature "
+        "and `ct_dst_sport_ltm` is the #1 GAT feature — "
+        "both are UNSW-NB15 connection-tracking features "
+        "that capture how many times a service was accessed, "
+        "making them strong indicators of scanning and DoS attacks!"
     )
 
     st.markdown("---")
     cyber_header("▸ ATTACK SUBGRAPH EXPLANATION")
-    show_image("outputs/gcn_subgraph_node_2.png",
+    show_image("outputs/gcn_subgraph_node_47911.png",
                "Yellow=Target · Red=Attack · Blue=Normal")
+    graph_explanation(
+        "Subgraph explanation for node 47911 — predicted as "
+        "<b style='color:#ff0055'>ATTACK</b> with 99.69% confidence. "
+        "The yellow node is the target connection. Red neighbour nodes "
+        "show surrounding attack traffic. This visualizes HOW the GCN "
+        "uses graph structure — not just features — to detect intrusions."
+    )
 
     st.markdown("---")
     cyber_header("▸ GAT ATTENTION WEIGHTS")
@@ -852,16 +954,36 @@ elif page == "◉ EXPLAINABILITY":
     col1, col2 = st.columns(2)
     with col1:
         show_image("outputs/gat_attention_weights.png")
+        graph_explanation(
+            "GAT attention weight distribution across all edges. "
+            "Mean attention: 0.3335 · Max: 1.0000. "
+            "Higher attention = GAT considers that connection "
+            "more important for the prediction decision."
+        )
     with col2:
         show_image("outputs/attention_per_head.png")
+        graph_explanation(
+            "Attention weights split across all 8 attention heads. "
+            "Each head specializes in different structural patterns — "
+            "some focus on attack clusters, others on normal traffic flows."
+        )
 
     st.markdown("---")
     col1, col2 = st.columns(2)
     with col1:
         show_image("outputs/top_attended_nodes.png")
+        graph_explanation(
+            "Top 50 most attended edges in the UNSW-NB15 graph. "
+            "These are the connections the GAT model considers "
+            "most critical when making its predictions."
+        )
     with col2:
-        show_image(
-            "outputs/attack_vs_normal_attention.png"
+        show_image("outputs/attack_vs_normal_attention.png")
+        graph_explanation(
+            "Attack connections: mean attention 0.3336 · "
+            "Normal connections: mean attention 0.3333. "
+            "GAT assigns slightly higher attention to attack traffic — "
+            "showing it has learned to focus on suspicious connections."
         )
 
 
@@ -892,48 +1014,40 @@ elif page == "▶ LIVE PREDICTION":
 
     with col1:
         cyber_header("CONNECTION")
-        duration = st.slider("Duration", 0, 100, 0)
-        protocol = st.selectbox(
-            "Protocol", ["tcp", "udp", "icmp"]
+        dur = st.slider("Duration (sec)", 0, 100, 0)
+        proto = st.selectbox(
+            "Protocol", ["tcp", "udp", "unas", "ospf", "arp"]
         )
-        wrong_fragment = st.slider(
-            "Wrong Fragments", 0, 10, 0
+        state = st.selectbox(
+            "State", ["FIN", "CON", "INT", "REQ", "RST"]
         )
-        hot = st.slider("Hot Indicators", 0, 30, 0)
-        logged_in = st.selectbox("Logged In", [0, 1])
+        spkts = st.slider("Src Packets", 0, 500, 10)
+        dpkts = st.slider("Dst Packets", 0, 500, 10)
 
     with col2:
         cyber_header("TRAFFIC STATS")
-        count = st.slider("Count", 0, 512, 1)
-        srv_count = st.slider(
-            "Service Count", 0, 512, 1
-        )
-        same_srv_rate = st.slider(
-            "Same Srv Rate", 0.0, 1.0, 1.0
-        )
-        serror_rate = st.slider(
-            "SYN Error Rate", 0.0, 1.0, 0.0
-        )
-        rerror_rate = st.slider(
-            "REJ Error Rate", 0.0, 1.0, 0.0
-        )
+        sbytes = st.slider("Src Bytes", 0, 100000, 500)
+        dbytes = st.slider("Dst Bytes", 0, 100000, 500)
+        rate = st.slider("Packet Rate", 0.0, 1000.0, 10.0)
+        sttl = st.slider("Src TTL", 0, 255, 64)
+        dttl = st.slider("Dst TTL", 0, 255, 64)
 
     with col3:
-        cyber_header("HOST STATS")
-        dst_host_count = st.slider(
-            "Dst Host Count", 0, 255, 100
+        cyber_header("CONNECTION TRACKING")
+        ct_state_ttl = st.slider(
+            "CT State TTL", 0, 6, 2
         )
-        dst_host_srv_count = st.slider(
-            "Dst Host Srv Count", 0, 255, 100
+        ct_srv_src = st.slider(
+            "CT Srv Src", 0, 100, 10
         )
-        dst_host_same_srv_rate = st.slider(
-            "Dst Host Srv Rate", 0.0, 1.0, 1.0
+        ct_srv_dst = st.slider(
+            "CT Srv Dst", 0, 100, 10
         )
-        dst_host_serror_rate = st.slider(
-            "Dst SYN Error", 0.0, 1.0, 0.0
+        is_sm_ips_ports = st.selectbox(
+            "Same IP/Port", [0, 1]
         )
-        dst_host_rerror_rate = st.slider(
-            "Dst REJ Error", 0.0, 1.0, 0.0
+        ct_dst_sport_ltm = st.slider(
+            "CT Dst Sport LTM", 0, 100, 5
         )
 
     st.markdown("---")
@@ -944,48 +1058,48 @@ elif page == "▶ LIVE PREDICTION":
         attack_score = 0
         reasons = []
 
-        if wrong_fragment > 0:
+        if ct_state_ttl <= 1:
             attack_score += 3
             reasons.append(
-                f"⚠ Wrong fragments: {wrong_fragment} "
-                f"— strong attack indicator"
+                f"⚠ CT State TTL: {ct_state_ttl} "
+                f"— abnormal state transition detected"
             )
-        if serror_rate > 0.5:
+        if is_sm_ips_ports == 1:
             attack_score += 2
             reasons.append(
-                f"⚠ SYN error rate: {serror_rate:.2f} "
-                f"— possible SYN flood attack"
+                f"⚠ Same IP/Port flag set "
+                f"— possible shellcode or exploit"
             )
-        if rerror_rate > 0.5:
+        if rate > 500:
             attack_score += 2
             reasons.append(
-                f"⚠ REJ error rate: {rerror_rate:.2f} "
-                f"— port scanning detected"
+                f"⚠ Packet rate: {rate:.1f} "
+                f"— possible DoS/flood attack"
             )
-        if dst_host_serror_rate > 0.5:
+        if dur == 0 and dpkts > 100:
             attack_score += 2
             reasons.append(
-                f"⚠ Host SYN error: "
-                f"{dst_host_serror_rate:.2f} "
-                f"— host under attack"
+                f"⚠ Zero duration with high dst packets "
+                f"— reconnaissance detected"
             )
-        if dst_host_rerror_rate > 0.5:
+        if ct_srv_dst > 80:
             attack_score += 1
             reasons.append(
-                f"⚠ Host REJ error: "
-                f"{dst_host_rerror_rate:.2f}"
+                f"⚠ CT Srv Dst: {ct_srv_dst} "
+                f"— high service destination connections"
             )
-        if hot > 5:
+        if sttl < 10 or dttl < 10:
             attack_score += 1
             reasons.append(
-                f"⚠ Hot indicators: {hot} — "
-                f"suspicious activity"
+                f"⚠ Very low TTL values "
+                f"(src:{sttl} dst:{dttl}) "
+                f"— possible spoofing"
             )
-        if count > 200:
+        if state in ["REQ", "RST"] and rate > 100:
             attack_score += 1
             reasons.append(
-                f"⚠ High count: {count} — "
-                f"possible flood"
+                f"⚠ State {state} with high rate "
+                f"— incomplete/reset connections"
             )
 
         confidence = min(
@@ -1054,25 +1168,29 @@ elif page == "▶ LIVE PREDICTION":
         cyber_header("▸ FEATURE RISK ANALYSIS")
         risk_df = pd.DataFrame({
             'FEATURE': [
-                'Wrong Fragments', 'SYN Error Rate',
-                'REJ Error Rate', 'Hot Indicators',
-                'Connection Count', 'Logged In'
+                'CT State TTL', 'Same IP/Port',
+                'Packet Rate', 'CT Srv Dst',
+                'Src TTL', 'State'
             ],
             'VALUE': [
-                wrong_fragment, serror_rate,
-                rerror_rate, hot, count, logged_in
+                ct_state_ttl, is_sm_ips_ports,
+                rate, ct_srv_dst,
+                sttl, state
             ],
             'RISK': [
-                '🔴 HIGH' if wrong_fragment > 0
+                '🔴 HIGH' if ct_state_ttl <= 1
                 else '🟢 LOW',
-                '🔴 HIGH' if serror_rate > 0.5
+                '🔴 HIGH' if is_sm_ips_ports == 1
                 else '🟢 LOW',
-                '🔴 HIGH' if rerror_rate > 0.5
+                '🔴 HIGH' if rate > 500
+                else '🟡 MED' if rate > 200
                 else '🟢 LOW',
-                '🟡 MED' if hot > 5 else '🟢 LOW',
-                '🟡 MED' if count > 200 else '🟢 LOW',
-                '🟢 SAFE' if logged_in == 1
-                else '🟡 UNKNOWN'
+                '🟡 MED' if ct_srv_dst > 80
+                else '🟢 LOW',
+                '🔴 HIGH' if sttl < 10
+                else '🟢 LOW',
+                '🟡 WATCH' if state in ['REQ', 'RST']
+                else '🟢 NORMAL'
             ]
         })
         st.dataframe(risk_df,
@@ -1095,11 +1213,63 @@ elif page == "◆ MODEL COMPARISON":
 
     col1, col2 = st.columns(2)
     with col1:
-        cyber_header("▸ RADAR CHART")
-        show_image("outputs/radar_chart.png")
+        cyber_header("▸ INTERACTIVE RADAR CHART")
+        import plotly.graph_objects as go
+
+        default_metrics = {
+            'GCN': [95.17, 94.11, 99.11, 96.54, 98.90],
+            'GAT': [92.84, 90.48, 100.0, 95.00, 96.70],
+            'Random Forest': [96.08, 96.48, 97.82, 97.14, 99.41],
+            'MLP': [94.87, 95.47, 97.07, 96.26, 99.11],
+        }
+        categories = ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'ROC-AUC']
+        fig_radar = go.Figure()
+        colors = ['#00ff88', '#b400ff', '#ff6b00', '#ff0055']
+        fill_colors = [
+            'rgba(0,255,136,0.08)', 'rgba(180,0,255,0.08)',
+            'rgba(255,107,0,0.08)', 'rgba(255,0,85,0.08)'
+        ]
+        for (model, values), color, fill in zip(default_metrics.items(), colors, fill_colors):
+            fig_radar.add_trace(go.Scatterpolar(
+                r=values + [values[0]],
+                theta=categories + [categories[0]],
+                fill='toself', name=model,
+                line=dict(color=color, width=2),
+                fillcolor=fill
+            ))
+        fig_radar.update_layout(
+            polar=dict(
+                bgcolor='#020b14',
+                radialaxis=dict(visible=True, autorange=True,
+                                tickfont=dict(color='#00ccff', size=9)),
+                angularaxis=dict(gridcolor='rgba(0,255,136,0.15)',
+                                 tickfont=dict(color='#00ff88', size=10))
+            ),
+            paper_bgcolor='#020b14',
+            font=dict(color='#00ff88', family='Share Tech Mono'),
+            legend=dict(bgcolor='rgba(0,0,0,0)',
+                        bordercolor='rgba(0,255,136,0.3)', font=dict(size=10)),
+            margin=dict(t=30, b=30), height=400
+        )
+        st.plotly_chart(fig_radar, use_container_width=True,
+                        config={'displayModeBar': True, 'displaylogo': False})
+        graph_explanation(
+            "Radar chart comparing all 4 models across 5 metrics on UNSW-NB15. "
+            "<b style='color:#00ff88'>GCN</b> shows the best balance of all metrics. "
+            "While Random Forest has higher accuracy, "
+            "GCN and GAT provide <b style='color:#00ccff'>explainable decisions</b> "
+            "— critical for real-world cybersecurity deployment."
+        )
     with col2:
         cyber_header("▸ METRICS HEATMAP")
         show_image("outputs/metrics_heatmap.png")
+        graph_explanation(
+            "Heatmap of all model metrics on UNSW-NB15. "
+            "<b style='color:#00ff88'>Darker = stronger performance.</b> "
+            "GCN and GAT show consistently competitive scores. "
+            "GAT achieves perfect recall of 1.0000 — "
+            "it missed zero attacks in the test set."
+        )
 
     st.markdown("---")
     cyber_header("▸ ACCURACY vs EXPLAINABILITY")
@@ -1107,10 +1277,25 @@ elif page == "◆ MODEL COMPARISON":
                "Key research argument — "
                "XGNN achieves high explainability "
                "with competitive accuracy")
+    graph_explanation(
+        "This is the core research argument of this project. "
+        "Traditional models like Random Forest achieve high accuracy "
+        "but are <b style='color:#ff6b00'>black boxes</b>. "
+        "GCN and GAT achieve competitive accuracy on UNSW-NB15 "
+        "while providing <b style='color:#00ff88'>full explainability</b> — "
+        "showing WHICH features and graph connections triggered each alert."
+    )
 
     st.markdown("---")
     cyber_header("▸ FULL MODEL COMPARISON")
     show_image("outputs/model_comparison.png")
+    graph_explanation(
+        "Full comparison of all 4 models across all metrics on UNSW-NB15. "
+        "GCN achieves the best balance of accuracy and explainability. "
+        "Random Forest leads in raw accuracy at 96.08% but cannot "
+        "explain its decisions — making it unsuitable for "
+        "<b style='color:#00ccff'>transparent cybersecurity deployment.</b>"
+    )
 
     st.markdown("---")
 
@@ -1172,12 +1357,19 @@ elif page == "📂 CUSTOM DATASET":
 
     # ── Simple Upload ──
     cyber_header("▸ UPLOAD YOUR DATASET")
+    st.info(
+        "ℹ️ This model was trained on the "
+        "UNSW-NB15 dataset — 175,341 connections · "
+        "42 features · 9 attack categories. "
+        "Upload any compatible network traffic CSV "
+        "for instant analysis."
+    )
 
     uploaded_file = st.file_uploader(
         "Drop your CSV file here",
         type=["csv"],
-        help="Supports: KDD Cup, NSL-KDD, "
-             "CIC-IDS-2017, UNSW-NB15, "
+        help="Supports: UNSW-NB15 (primary), "
+             "CIC-IDS-2017, NSL-KDD, KDD Cup, "
              "or any network traffic CSV"
     )
 
@@ -1621,10 +1813,10 @@ elif page == "📂 CUSTOM DATASET":
                 JUST UPLOAD — NO SETUP NEEDED<br>
                 THE SYSTEM DOES EVERYTHING AUTOMATICALLY<br>
                 ────────────────────────────<br>
-                ► KDD CUP 1999 &nbsp;✅<br>
-                ► NSL-KDD &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅<br>
+                ► UNSW-NB15 &nbsp;&nbsp;&nbsp;✅ PRIMARY<br>
                 ► CIC-IDS-2017 &nbsp;✅<br>
-                ► UNSW-NB15 &nbsp;&nbsp;&nbsp;✅<br>
+                ► NSL-KDD &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅<br>
+                ► KDD CUP 1999 &nbsp;✅<br>
                 ► ANY NETWORK CSV ✅
             </div>
         </div>

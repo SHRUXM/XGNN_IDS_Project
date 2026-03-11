@@ -31,18 +31,18 @@ def build_networkx_graph(df, feature_cols):
     print(f"\nAdding {len(df)} nodes to graph...")
     for idx, row in df.iterrows():
         G.add_node(idx,
-                   protocol=row['protocol_type'],
+                   protocol=row['proto'],
                    service=row['service'],
-                   flag=row['flag'],
+                   state=row['state'],
                    label=row['label'])
 
-    # Add edges based on similar protocol and service
+        # Add edges based on similar proto and service
     print("Adding edges between similar connections...")
     edge_count = 0
 
-    # Group by protocol_type and service
-    # Connect nodes that share same protocol and service
-    groups = df.groupby(['protocol_type', 'service'])
+    # Group by proto and service
+    # Connect nodes that share same proto and service
+    groups = df.groupby(['proto', 'service'])
 
     for name, group in groups:
         indices = group.index.tolist()
@@ -60,57 +60,102 @@ def build_networkx_graph(df, feature_cols):
 
 def visualize_graph(G, title="Network Traffic Graph",
                    sample_size=100):
-    """
-    Visualize a sample of the graph
-    Red nodes = Attack
-    Blue nodes = Normal
-    """
-    print("\nGenerating graph visualization...")
+    import random
 
-    # Take a small sample for visualization
-    sample_nodes = list(G.nodes())[:sample_size]
-    subgraph = G.subgraph(sample_nodes)
+    # Get attack and normal nodes
+    attack_nodes = [n for n, d in G.nodes(data=True)
+                    if d.get('label') == 1]
+    normal_nodes = [n for n, d in G.nodes(data=True)
+                    if d.get('label') == 0]
 
-    # Get node colors based on label
+    # Pick seed nodes that HAVE edges
+    nodes_with_edges = [n for n in G.nodes()
+                        if G.degree(n) > 0]
+
+    # Pick 10 random seed nodes and expand their neighbors
+    seeds = random.sample(
+        nodes_with_edges,
+        min(10, len(nodes_with_edges))
+    )
+
+    # Collect seeds + their neighbors
+    expanded = set(seeds)
+    for s in seeds:
+        expanded.update(list(G.neighbors(s))[:15])
+
+    # Now balance attack vs normal within expanded set
+    exp_attack = [n for n in expanded
+                  if G.nodes[n].get('label') == 1]
+    exp_normal = [n for n in expanded
+                  if G.nodes[n].get('label') == 0]
+
+    # Fill remaining from full graph if needed
+    need_attack = max(0, 50 - len(exp_attack))
+    need_normal = max(0, 50 - len(exp_normal))
+
+    if need_attack > 0:
+        extras = [n for n in attack_nodes
+                  if n not in expanded]
+        exp_attack += random.sample(
+            extras, min(need_attack, len(extras))
+        )
+    if need_normal > 0:
+        extras = [n for n in normal_nodes
+                  if n not in expanded]
+        exp_normal += random.sample(
+            extras, min(need_normal, len(extras))
+        )
+
+    sampled = list(set(exp_attack[:50] + exp_normal[:50]))
+    subgraph = G.subgraph(sampled)
+
+    # Node colors
     colors = []
     for node in subgraph.nodes():
         label = G.nodes[node].get('label', 0)
-        if label == 1:
-            colors.append('red')      # Attack
-        else:
-            colors.append('blue')     # Normal
+        colors.append('red' if label == 1 else 'blue')
 
-    # Plot
+    # Plot with spring layout for natural flow
     plt.figure(figsize=(12, 8))
-    pos = nx.spring_layout(subgraph, seed=42)
+    pos = nx.spring_layout(subgraph, seed=42, k=2.5)
 
-    nx.draw_networkx(
-        subgraph,
-        pos=pos,
-        node_color=colors,
-        node_size=100,
-        with_labels=False,
-        arrows=True,
+    # Draw edges first
+    nx.draw_networkx_edges(
+        subgraph, pos,
         edge_color='gray',
-        alpha=0.7
+        arrows=True,
+        alpha=0.5,
+        width=0.8,
+        arrowsize=10
     )
 
-    # Add legend
-    plt.scatter([], [], c='red',
+    # Draw nodes
+    nx.draw_networkx_nodes(
+        subgraph, pos,
+        node_color=colors,
+        node_size=120,
+        alpha=0.9
+    )
+
+    # Legend
+    plt.scatter([], [], c='red', s=80,
                 label='Attack (Anomaly)')
-    plt.scatter([], [], c='blue',
+    plt.scatter([], [], c='blue', s=80,
                 label='Normal Traffic')
     plt.legend(fontsize=12)
     plt.title(title, fontsize=16, fontweight='bold')
     plt.axis('off')
 
-    # Save the plot
-    os.makedirs('../outputs', exist_ok=True)
-    plt.savefig('../outputs/network_graph.png',
-                dpi=150, bbox_inches='tight')
+    # Fix save path
+    base_dir = os.path.dirname(
+        os.path.dirname(os.path.abspath(__file__))
+    )
+    out_dir = os.path.join(base_dir, 'outputs')
+    os.makedirs(out_dir, exist_ok=True)
+    save_path = os.path.join(out_dir, 'network_graph.png')
+    plt.savefig(save_path, dpi=150, bbox_inches='tight')
     plt.show()
-    print("Graph saved to outputs/network_graph.png")
-
+    print(f"Graph saved to {save_path}")
 
 def convert_to_pytorch_geometric(df, feature_cols):
     """
@@ -132,9 +177,9 @@ def convert_to_pytorch_geometric(df, feature_cols):
     )
 
     # Build edge index
-    # Connect nodes based on protocol and service similarity
+    # Connect nodes based on proto and service similarity
     edge_list = []
-    groups = df.groupby(['protocol_type', 'service'])
+    groups = df.groupby(['proto', 'service'])
 
     for name, group in groups:
         indices = group.index.tolist()
@@ -215,7 +260,7 @@ def build_graph_pipeline(df, feature_cols):
     G = build_networkx_graph(df, feature_cols)
 
     # Step 2: Visualize the graph
-    visualize_graph(G, title="XGNN Network Intrusion Graph")
+    visualize_graph(G, title="UNSW-NB15 Network Intrusion Graph")
 
     # Step 3: Convert to PyTorch Geometric
     data = convert_to_pytorch_geometric(df, feature_cols)
