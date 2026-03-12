@@ -1814,7 +1814,7 @@ elif page == "📂 CUSTOM DATASET":
                 THE SYSTEM DOES EVERYTHING AUTOMATICALLY<br>
                 ────────────────────────────<br>
                 ► UNSW-NB15 &nbsp;&nbsp;&nbsp;✅ PRIMARY &nbsp;<a href="https://www.kaggle.com/datasets/mrwellsdavid/unsw-nb15" target="_blank" style="color:#00ff88;font-size:0.7rem;">[DOWNLOAD]</a><br>
-                ► CIC-IDS-2017 &nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/cicdataset/cicids2017" target="_blank" style="color:#00ccff;font-size:0.7rem;">[DOWNLOAD]</a><br>
+                ► CIC-IDS-2017 &nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/chethuhn/network-intrusion-dataset" target="_blank" style="color:#00ccff;font-size:0.7rem;">[DOWNLOAD]</a><br>
                 ► NSL-KDD &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/hassan06/nslkdd" target="_blank" style="color:#00ccff;font-size:0.7rem;">[DOWNLOAD]</a><br>
                 ► KDD CUP 1999 &nbsp;✅ &nbsp;<a href="https://www.kaggle.com/datasets/galaxyh/kdd-cup-1999-data" target="_blank" style="color:#00ccff;font-size:0.7rem;">[DOWNLOAD]</a><br>
                 ► ANY NETWORK CSV ✅
