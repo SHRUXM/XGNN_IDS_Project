@@ -29,3 +29,6 @@ pip install -r requirements.txt
 - explainability/ — GNNExplainer and attention visualization
 - evaluation/ — metrics and comparison
 - notebooks/ — Jupyter notebooks
+
+## Live Demo
+🚀 https://xgnnidsproject-2oqcmycsin9hf5rjr5tkuu.streamlit.app/
