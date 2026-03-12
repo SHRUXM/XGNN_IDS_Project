@@ -10,8 +10,7 @@ Intrusion Detection System using GCN and GAT architectures
 with XAI techniques for transparent threat detection.
 
 ## Dataset
-- CICIDS2017
-- UNSW-NB15
+- UNSW-NB15 (Primary) — 175,341 connections, 42 features, 9 attack categories
 
 ## Technologies Used
 - Python 3.10
